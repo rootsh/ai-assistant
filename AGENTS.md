@@ -1,0 +1,26 @@
+# Instruções para agentes
+
+## Escopo
+- Implementar somente a fase aprovada em `PLANS.md`; a fase atual é Fase 1.
+- Não antecipar autenticação, integrações, LLM, RAG, UI, extensão ou deploy.
+- Não executar SQL arbitrário gerado por LLM; ferramentas futuras devem usar operações parametrizadas e allowlists.
+- Não confiar em identidade, empresa, cliente ou chamado informados pelo navegador. Validar autorização no servidor.
+- Não inventar endpoints SysAid ou ERP. Usar contratos configuráveis até receber documentação oficial.
+
+## Arquitetura
+- Manter monorepo modular e backend coeso; evitar microserviços prematuros.
+- Separar prompts, workflows, tools e conectores quando aprovados.
+- Documentar decisões em `docs/architecture/decisions/`.
+- Preservar independência de provedor LLM e uso de componentes permissivos sem módulos Enterprise.
+
+## Dependências
+- Antes de adicionar/atualizar dependência, conferir licença, compatibilidade, atividade de manutenção, versão estável e dependências transitivas relevantes.
+- Registrar análise em `docs/architecture/dependencies.md`.
+- Não instalar componentes Enterprise nem extensões comerciais.
+
+## Segurança e qualidade
+- Não registrar segredos, tokens ou conteúdo sensível de chamados/respostas.
+- Credenciais vêm do ambiente; `.env` não deve ser versionado.
+- Consultas ao banco devem ser parametrizadas; não expor consultas arbitrárias.
+- Manter testes automatizados e atualizar README/documentação com mudanças de contratos e comandos.
+- Liveness mede apenas o processo; readiness verifica dependências.
