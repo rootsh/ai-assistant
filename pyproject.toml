@@ -7,7 +7,7 @@ name = "rtm-ai-assistant"
 version = "0.1.0"
 description = "Fundação modular do RTM AI Assistant"
 readme = "README.md"
-requires-python = ">=3.12,<3.13"
+requires-python = ">=3.12,<3.15"
 dependencies = [
   "asyncpg==0.32.0",
   "fastapi==0.165.0",
@@ -30,3 +30,4 @@ where = ["apps/api/src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+
