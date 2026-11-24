@@ -9,7 +9,7 @@ Este repositório implementa somente a **Fase 1: fundação do monorepo e ambien
 ## Pré-requisitos
 
 - Docker Engine e Docker Compose v2
-- Python 3.12+ (opcional, para testes fora do Compose)
+- Python 3.12–3.14 (opcional, para testes fora do Compose)
 
 ## Início rápido
 
@@ -46,3 +46,4 @@ compose.yaml              API, PostgreSQL e Valkey para desenvolvimento
 ```
 
 Consulte `.env.example` para configuração, `docs/architecture/dependencies.md` para dependências e `PLANS.md` para fases futuras. Credenciais locais padrão servem somente para desenvolvimento.
+
