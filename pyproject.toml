@@ -30,4 +30,3 @@ where = ["apps/api/src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
-

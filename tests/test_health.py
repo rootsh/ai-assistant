@@ -1,4 +1,6 @@
-from fastapi.testclient import TestClient
+import asyncio
+
+from httpx import ASGITransport, AsyncClient, Response
 
 from rtm_ai.main import create_app
 
@@ -32,7 +34,7 @@ class FakeRedis:
         self.closed = True
 
 
-def build_client(*, db_ok: bool = True, cache_ok: bool = True):
+async def request_health(*, path: str, db_ok: bool = True, cache_ok: bool = True) -> tuple[Response, FakePool, FakeRedis]:
     pool = FakePool(db_ok)
     cache = FakeRedis(cache_ok)
 
@@ -42,13 +44,17 @@ def build_client(*, db_ok: bool = True, cache_ok: bool = True):
     def redis_factory(_: str) -> FakeRedis:
         return cache
 
-    return TestClient(create_app(pool_factory=pool_factory, redis_factory=redis_factory)), pool, cache
+    app = create_app(pool_factory=pool_factory, redis_factory=redis_factory)
+    async with app.router.lifespan_context(app):
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            response = await client.get(path)
+    return response, pool, cache
 
 
 def test_liveness_is_independent_of_dependencies() -> None:
-    client, pool, cache = build_client(db_ok=False, cache_ok=False)
-    with client:
-        response = client.get("/health/live")
+    response, pool, cache = asyncio.run(
+        request_health(path="/health/live", db_ok=False, cache_ok=False)
+    )
 
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
@@ -56,9 +62,7 @@ def test_liveness_is_independent_of_dependencies() -> None:
 
 
 def test_readiness_reports_healthy_dependencies() -> None:
-    client, _, _ = build_client()
-    with client:
-        response = client.get("/health/ready")
+    response, _, _ = asyncio.run(request_health(path="/health/ready"))
 
     assert response.status_code == 200
     assert response.json() == {
@@ -68,9 +72,9 @@ def test_readiness_reports_healthy_dependencies() -> None:
 
 
 def test_readiness_returns_503_when_a_dependency_is_unavailable() -> None:
-    client, _, _ = build_client(cache_ok=False)
-    with client:
-        response = client.get("/health/ready")
+    response, _, _ = asyncio.run(
+        request_health(path="/health/ready", cache_ok=False)
+    )
 
     assert response.status_code == 503
     assert response.json() == {
