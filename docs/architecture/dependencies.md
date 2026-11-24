@@ -4,6 +4,7 @@ Verificação inicial em 2026-11-23. Versões estão fixadas para reprodutibilid
 
 | Componente | Versão | Uso | Licença declarada | Compatibilidade/atividade observada |
 |---|---:|---|---|---|
+| setuptools | 84.2.1 | Backend de build do pacote | MIT | PyPI marca manutenção ativa e release out/2026; Python >=3.10 |
 | FastAPI | 0.165.0 | Framework HTTP | MIT | Release publicado em nov/2026; compatível com Python >=3.11 |
 | Uvicorn | 0.54.0 | Servidor ASGI | BSD-3-Clause | Projeto ativo; publicado no PyPI |
 | asyncpg | 0.32.0 | Driver async PostgreSQL | Apache-2.0 | Release out/2026; PyPI declara suporte a PostgreSQL até 19 e Python >=3.9 |
@@ -16,13 +17,14 @@ Verificação inicial em 2026-11-23. Versões estão fixadas para reprodutibilid
 ## Referências primárias
 
 - [FastAPI (MIT)](https://github.com/fastapi/fastapi)
+- [setuptools no PyPI](https://pypi.org/project/setuptools/)
 - [Uvicorn no PyPI](https://pypi.org/project/uvicorn/)
 - [asyncpg no PyPI](https://pypi.org/project/asyncpg/)
 - [redis-py no PyPI](https://pypi.org/project/redis/)
 - [HTTPX no PyPI](https://pypi.org/project/httpx/)
 - [pytest no PyPI](https://pypi.org/project/pytest/)
 - [Licença PostgreSQL](https://www.postgresql.org/about/licence/)
-- [Valkey](https://valkey.io/)
+- [Valkey (BSD-3-Clause)](https://github.com/valkey-io/valkey)
 - [Licenças oficiais do Redis](https://redis.io/legal/licenses/)
 
 ## Nota sobre Redis

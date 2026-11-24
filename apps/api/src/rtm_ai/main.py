@@ -35,14 +35,15 @@ def create_app(
                 "postgresql://rtm_ai:local-only-change-me@localhost:5432/rtm_ai",
             )
         )
-        app.state.redis = redis_factory(
-            os.getenv("REDIS_URL", "redis://localhost:6379/0")
-        )
         try:
+            app.state.redis = redis_factory(
+                os.getenv("REDIS_URL", "redis://localhost:6379/0")
+            )
             yield
         finally:
             await app.state.db_pool.close()
-            await app.state.redis.aclose()
+            if hasattr(app.state, "redis"):
+                await app.state.redis.aclose()
 
     app = FastAPI(
         title="RTM AI Assistant API",
