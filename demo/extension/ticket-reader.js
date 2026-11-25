@@ -174,14 +174,17 @@ copyDebugButton.addEventListener("click", async () => {
   }
 });
 
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  if (message?.type !== "RTM_READ_VISIBLE_CONTEXT") return false;
-  const context = readVisibleTicketContext(Boolean(message.debug));
-  void chrome.runtime.sendMessage({
-    type: "RTM_VISIBLE_CONTEXT_RESULT",
-    requestId: message.requestId,
-    context
+if (!globalThis.__rtmTicketReaderInstalled) {
+  globalThis.__rtmTicketReaderInstalled = true;
+  chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+    if (message?.type !== "RTM_READ_VISIBLE_CONTEXT") return false;
+    const context = readVisibleTicketContext(Boolean(message.debug));
+    void chrome.runtime.sendMessage({
+      type: "RTM_VISIBLE_CONTEXT_RESULT",
+      requestId: message.requestId,
+      context
+    });
+    sendResponse({ ok: true });
+    return false;
   });
-  sendResponse({ ok: true });
-  return false;
-});
+}
