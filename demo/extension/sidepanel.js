@@ -10,6 +10,11 @@ const questionInput = document.querySelector("#question");
 const sendButton = document.querySelector("#send-button");
 
 let screenContext = null;
+const buildVersion = document.querySelector("#build-version");
+if (buildVersion) {
+  const manifest = chrome.runtime.getManifest();
+  buildVersion.textContent = `v${manifest.version_name || manifest.version}`;
+}
 
 const labels = {
   ticket_id: "Chamado",
@@ -22,13 +27,13 @@ const labels = {
 };
 
 function readVisibleTicketContext() {
+  const emptyContext = () => ({
+    ticket_id: null, subject: null, customer: null, support_type: null,
+    requester: null, priority: null, status: null,
+    __diagnostics: { host: location.hostname, textLength: 0, fieldCount: 0 }
+  });
   // Keep extraction limited to SysAid hosts while tolerating tenant TLD variants.
-  if (!location.hostname.toLowerCase().includes("sysaidit")) {
-    return {
-      ticket_id: null, subject: null, customer: null, support_type: null,
-      requester: null, priority: null, status: null
-    };
-  }
+  if (!location.hostname.toLowerCase().includes("sysaidit")) return emptyContext();
   const aliases = {
     ticket_id: ["id", "ticket id", "case id", "número", "número do chamado", "id do chamado", "chamado", "solicitação"],
     subject: ["subject", "title", "assunto", "título", "resumo", "breve descrição", "breve descricao"],
@@ -147,7 +152,12 @@ function readVisibleTicketContext() {
     support_type: values.support_type || null,
     requester: values.requester || null,
     priority: values.priority || null,
-    status: values.status || null
+    status: values.status || null,
+    __diagnostics: {
+      host: location.hostname,
+      textLength: (document.body?.innerText || "").length,
+      fieldCount: Object.values(values).filter(Boolean).length
+    }
   };
 }
 
@@ -156,7 +166,7 @@ authorizeButton.addEventListener("click", async () => {
   try {
     // The optional host permission is requested immediately from this click gesture.
     const granted = await chrome.permissions.request({
-      origins: ["https://*.sysaidit.com/*"]
+      origins: ["https://*.sysaidit.com/*", "https://rtm.sysaidit.co/*"]
     });
     if (!granted) {
       readStatus.textContent = "O Chrome não concedeu acesso. Você pode autorizar depois por este botão.";
@@ -215,9 +225,12 @@ readButton.addEventListener("click", async () => {
       func: readVisibleTicketContext
     });
     const context = {};
+    const frameDiagnostics = [];
     for (const { result } of frameResults) {
       if (!result || typeof result !== "object") continue;
+      if (result.__diagnostics) frameDiagnostics.push(result.__diagnostics);
       for (const [key, value] of Object.entries(result)) {
+        if (key.startsWith("__")) continue;
         if (value && !context[key]) context[key] = value;
       }
     }
@@ -233,9 +246,12 @@ readButton.addEventListener("click", async () => {
     renderContext(context);
     const fieldCount = Object.values(context).filter(Boolean).length;
     if (!fieldCount) screenContext = null;
+    const detailFields = ["customer", "subject", "support_type"].filter((key) => context[key]).length;
     readStatus.textContent = fieldCount
-      ? `${fieldCount} campo(s) capturado(s). Somente os valores selecionados são enviados à API local.`
-      : "Não encontrei campos de chamado. Abra um chamado no SysAid e tente novamente.";
+      ? detailFields
+        ? `${fieldCount} campo(s) capturado(s). Somente os valores selecionados são enviados à API local.`
+        : `${fieldCount} campo(s) capturado(s), mas os campos do formulário não foram lidos. Frames: ${frameDiagnostics.map((item) => item.host).join(", ") || "nenhum"}; texto visível: ${frameDiagnostics.map((item) => item.textLength).join("/") || "0"} caracteres.`
+      : `Não encontrei campos de chamado. Frames: ${frameDiagnostics.map((item) => item.host).join(", ") || "nenhum"}.`;
     readIndicator.classList.toggle("ready", fieldCount > 0);
   } catch (error) {
     readStatus.textContent = `Não foi possível ler esta aba: ${error.message}`;
