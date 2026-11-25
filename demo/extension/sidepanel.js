@@ -204,17 +204,10 @@ readButton.addEventListener("click", async () => {
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (!tab?.id) throw new Error("Não encontrei uma aba ativa.");
-    const frameResults = await chrome.scripting.executeScript({
-      target: { tabId: tab.id, allFrames: true },
+    const [{ result: context }] = await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
       func: readVisibleTicketContext
     });
-    const context = {};
-    for (const { result } of frameResults) {
-      if (!result) continue;
-      for (const [key, value] of Object.entries(result)) {
-        if (value && !context[key]) context[key] = value;
-      }
-    }
     screenContext = context;
     renderContext(context);
     const fieldCount = Object.values(context).filter(Boolean).length;
