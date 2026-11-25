@@ -1,5 +1,6 @@
 const API_URL = "http://localhost:8000/api/demo/chat";
 const readButton = document.querySelector("#read-button");
+const authorizeButton = document.querySelector("#authorize-button");
 const readStatus = document.querySelector("#read-status");
 const readIndicator = document.querySelector("#read-indicator");
 const contextFields = document.querySelector("#context-fields");
@@ -20,6 +21,9 @@ const labels = {
 };
 
 function readVisibleTicketContext() {
+  if (location.hostname !== "rtm.sysaidit.com") {
+    throw new Error("Esta demo está configurada para rtm.sysaidit.com.");
+  }
   const aliases = {
     ticket_id: ["id", "ticket id", "case id", "número", "número do chamado", "id do chamado", "chamado", "solicitação"],
     subject: ["subject", "title", "assunto", "título", "resumo"],
@@ -60,7 +64,6 @@ function readVisibleTicketContext() {
     if (separator > 0) setValue(line.slice(0, separator), line.slice(separator + 1));
   }
 
-  if (!values.subject && document.title) values.subject = document.title.slice(0, 160);
   return {
     ticket_id: values.ticket_id || null,
     subject: values.subject || null,
@@ -70,6 +73,27 @@ function readVisibleTicketContext() {
     status: values.status || null
   };
 }
+
+authorizeButton.addEventListener("click", async () => {
+  authorizeButton.disabled = true;
+  try {
+    // The optional host permission is requested immediately from this click gesture.
+    const granted = await chrome.permissions.request({
+      origins: ["https://rtm.sysaidit.com/*"]
+    });
+    if (!granted) {
+      readStatus.textContent = "O Chrome não concedeu acesso. Você pode autorizar depois por este botão.";
+      return;
+    }
+    authorizeButton.textContent = "Acesso ao SysAid autorizado";
+    readStatus.textContent = "Abra um chamado e clique em “Ler chamado visível”. O acesso vale para rtm.sysaidit.com e pode ser revogado nas configurações da extensão.";
+    readButton.disabled = false;
+  } catch (error) {
+    readStatus.textContent = `Não foi possível solicitar a permissão: ${error.message}`;
+  } finally {
+    authorizeButton.disabled = false;
+  }
+});
 
 function renderContext(context) {
   contextFields.replaceChildren();
@@ -111,9 +135,10 @@ readButton.addEventListener("click", async () => {
     screenContext = context;
     renderContext(context);
     const fieldCount = Object.values(context).filter(Boolean).length;
+    if (!fieldCount) screenContext = null;
     readStatus.textContent = fieldCount
       ? `${fieldCount} campo(s) capturado(s). Somente os valores selecionados são enviados à API local.`
-      : "Não encontrei campos conhecidos nesta tela. Você ainda pode testar o chat simulado.";
+      : "Não encontrei campos de chamado. Abra um chamado no SysAid e tente novamente.";
     readIndicator.classList.toggle("ready", fieldCount > 0);
   } catch (error) {
     readStatus.textContent = `Não foi possível ler esta aba: ${error.message}`;
@@ -124,8 +149,8 @@ readButton.addEventListener("click", async () => {
 });
 
 async function sendQuestion(question) {
-  if (!screenContext) {
-    readStatus.textContent = "Leia os campos visíveis antes de iniciar a demonstração.";
+  if (!screenContext || (!screenContext.ticket_id && !screenContext.subject)) {
+    readStatus.textContent = "Abra um chamado e leia pelo menos o ID ou o assunto antes de conversar.";
     return;
   }
   addMessage("user", question);

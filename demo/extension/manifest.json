@@ -5,6 +5,7 @@
   "description": "Demonstra leitura explícita de campos visíveis da aba atual e chat simulado.",
   "minimum_chrome_version": "116",
   "permissions": ["activeTab", "scripting", "sidePanel"],
+  "optional_host_permissions": ["https://rtm.sysaidit.com/*"],
   "host_permissions": ["http://localhost:8000/*"],
   "background": {
     "service_worker": "service-worker.js",

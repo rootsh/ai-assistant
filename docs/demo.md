@@ -4,8 +4,8 @@
 
 1. Abrir um chamado real no SysAid em uma aba Chrome.
 2. Carregar `demo/extension` como extensão não empacotada em `chrome://extensions` (habilitar modo de desenvolvedor).
-3. Clicar no ícone da extensão para abrir o side panel.
-4. Clicar em **Ler chamado visível** e mostrar os campos que foram reconhecidos.
+3. Clicar no ícone da extensão para abrir o side panel e em **Autorizar acesso ao SysAid**. O Chrome pede acesso somente a `rtm.sysaidit.com`.
+4. Abrir um chamado e clicar em **Ler chamado visível**. Mostrar os campos reconhecidos.
 5. Perguntar “Qual é o SLA deste chamado?” e observar a resposta simulada chegando em streaming.
 
 ## Subir a API
@@ -19,7 +19,7 @@ A API fica em `http://localhost:8000`; readiness em `/health/ready`. PostgreSQL 
 
 ## O que a extensão lê
 
-A leitura só é acionada pelo analista. A permissão `activeTab` é temporária para a aba atual e `scripting` injeta a função de leitura sob demanda. A extensão procura labels/ARIA/textos simples correspondentes a ID, assunto, empresa/cliente, solicitante, prioridade e status. Campos reconhecidos ficam no side panel. O payload envia somente esses campos e a pergunta para o FastAPI local; não envia o texto integral da página, HTML, cookies ou screenshots.
+A leitura só é acionada pelo analista. A permissão opcional de host é pedida após clique explícito e limitada a `https://rtm.sysaidit.com/*`; Chrome mantém essa permissão até ser revogada em `chrome://extensions`. `scripting` injeta a função somente após **Ler chamado visível**. A extensão procura labels/ARIA/textos simples correspondentes a ID, assunto, empresa/cliente, solicitante, prioridade e status. Campos reconhecidos ficam no side panel. O payload envia somente esses campos e a pergunta para o FastAPI local; não envia o texto integral da página, HTML, cookies ou screenshots.
 
 O extractor é genérico e best effort. SysAid pode renderizar alguns dados em componentes sem labels DOM acessíveis ou dentro de canvas/iframes; nesses casos os campos podem não ser capturados. A demo não afirma compatibilidade universal com versões/layouts SysAid. Depois de validar o DOM da instância, os aliases e seletores podem ser ajustados sem inventar endpoints.
 
@@ -33,4 +33,4 @@ O extractor é genérico e best effort. SysAid pode renderizar alguns dados em c
 - Não use dados sensíveis em apresentações públicas.
 - A conexão à API é HTTP local para a demo; não deve ser exposta em rede ou usada em produção.
 - A API mock não é autenticada; CORS permite a extensão e origens locais de desenvolvimento.
-- Não conceda à extensão permissão permanente para todos os sites. O MVP usa interação explícita e `activeTab`.
+- A permissão concedida cobre apenas `rtm.sysaidit.com`; não conceda acesso amplo a todos os sites.
