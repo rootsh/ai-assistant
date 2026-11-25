@@ -22,7 +22,6 @@ const labels = {
 };
 
 function readVisibleTicketContext() {
-  if (location.hostname !== "rtm.sysaidit.com") return null;
   const aliases = {
     ticket_id: ["id", "ticket id", "case id", "número", "número do chamado", "id do chamado", "chamado", "solicitação"],
     subject: ["subject", "title", "assunto", "título", "resumo", "breve descrição", "breve descricao"],
@@ -208,6 +207,7 @@ readButton.addEventListener("click", async () => {
       target: { tabId: tab.id },
       func: readVisibleTicketContext
     });
+    if (!context) throw new Error("A aba não retornou contexto de chamado. Confira o domínio e tente novamente.");
     screenContext = context;
     renderContext(context);
     const fieldCount = Object.values(context).filter(Boolean).length;
