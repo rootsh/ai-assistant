@@ -126,6 +126,8 @@ readButton.addEventListener("click", async () => {
         build: chrome.runtime.getManifest().version_name || chrome.runtime.getManifest().version,
         tab: page ? `${page.origin}${page.pathname}` : null,
         grantedSysAidOrigins: (permissions.origins || []).filter((origin) => origin.toLowerCase().includes("sysaidit")),
+        injectionFrames: frameResults.injectionFrames || 0,
+        injectionError: frameResults.injectionError,
         framesReturned: frameResults.length,
         frames: frameDiagnostics,
         mergedFields: Object.keys(context).filter((key) => context[key])
@@ -150,6 +152,17 @@ async function collectFrameContexts(tabId) {
     }
   };
   chrome.runtime.onMessage.addListener(listener);
+  let injectionFrames = 0;
+  let injectionError = null;
+  try {
+    const injected = await chrome.scripting.executeScript({
+      target: { tabId, allFrames: true },
+      files: ["ticket-reader.js"]
+    });
+    injectionFrames = injected.length;
+  } catch (error) {
+    injectionError = error.message;
+  }
   let dispatchError = null;
   try {
     await chrome.tabs.sendMessage(tabId, {
@@ -158,12 +171,16 @@ async function collectFrameContexts(tabId) {
       debug: debugEnabled
     });
   } catch (error) {
-    dispatchError = error;
+    dispatchError = error.message;
   }
-  await new Promise((resolve) => setTimeout(resolve, 250));
+  await new Promise((resolve) => setTimeout(resolve, 300));
   chrome.runtime.onMessage.removeListener(listener);
-  if (!responses.length && dispatchError) {
-    throw new Error(`Nenhum content script respondeu: ${dispatchError.message}`);
+  responses.injectionFrames = injectionFrames;
+  responses.injectionError = injectionError;
+  if (!responses.length) {
+    throw new Error(
+      `Nenhum content script respondeu. Injeção: ${injectionFrames} frame(s)${injectionError ? ` (${injectionError})` : ""}; mensagem: ${dispatchError || "sem resposta"}.`
+    );
   }
   return responses;
 }
