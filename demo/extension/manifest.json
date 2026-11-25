@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "RTM AI Assistant — Demo",
+  "version": "0.1.0",
+  "description": "Demonstra leitura explícita de campos visíveis da aba atual e chat simulado.",
+  "minimum_chrome_version": "116",
+  "permissions": ["activeTab", "scripting", "sidePanel"],
+  "host_permissions": ["http://localhost:8000/*"],
+  "background": {
+    "service_worker": "service-worker.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Abrir RTM AI Assistant"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  }
+}

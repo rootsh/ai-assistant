@@ -1,4 +1,5 @@
 import asyncio
+import json
 
 from httpx import ASGITransport, AsyncClient, Response
 
@@ -81,3 +82,68 @@ def test_readiness_returns_503_when_a_dependency_is_unavailable() -> None:
         "status": "not_ready",
         "checks": {"postgres": "ok", "cache": "unavailable"},
     }
+
+
+def test_demo_chat_streams_a_mock_answer_with_screen_context() -> None:
+    async def run_demo():
+        pool = FakePool()
+        cache = FakeRedis()
+
+        async def pool_factory(_: str) -> FakePool:
+            return pool
+
+        def redis_factory(_: str) -> FakeRedis:
+            return cache
+
+        app = create_app(pool_factory=pool_factory, redis_factory=redis_factory)
+        async with app.router.lifespan_context(app):
+            async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+                return await client.post(
+                    "/api/demo/chat",
+                    json={
+                        "message": "Qual é o SLA?",
+                        "screen_context": {
+                            "ticket_id": "INC-2048",
+                            "subject": "Acesso VPN indisponível",
+                            "status": "Em andamento",
+                        },
+                    },
+                )
+
+    response = asyncio.run(run_demo())
+
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/event-stream")
+    tokens = [
+        json.loads(line[6:])["text"]
+        for line in response.text.splitlines()
+        if line.startswith("data: ") and '"token"' in line
+    ]
+    streamed_text = "".join(tokens)
+    assert "Resposta simulada" in streamed_text
+    assert "4 horas úteis" in streamed_text
+    assert "INC-2048" in streamed_text
+
+
+def test_demo_chat_rejects_unallowlisted_page_content() -> None:
+    async def run_demo():
+        async def pool_factory(_: str) -> FakePool:
+            return FakePool()
+
+        def redis_factory(_: str) -> FakeRedis:
+            return FakeRedis()
+
+        app = create_app(pool_factory=pool_factory, redis_factory=redis_factory)
+        async with app.router.lifespan_context(app):
+            async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+                return await client.post(
+                    "/api/demo/chat",
+                    json={
+                        "message": "Resumo",
+                        "screen_context": {},
+                        "full_page_text": "conteúdo não permitido",
+                    },
+                )
+
+    response = asyncio.run(run_demo())
+    assert response.status_code == 422

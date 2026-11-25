@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RTM AI Assistant</title>
+    <link rel="stylesheet" href="sidepanel.css" />
+  </head>
+  <body>
+    <header class="brand">
+      <div class="brand-mark">RTM</div>
+      <div><strong>AI Assistant</strong><small>Demo para SysAid</small></div>
+      <span class="demo-pill">MOCK</span>
+    </header>
+
+    <main>
+      <section class="context-card" aria-labelledby="context-heading">
+        <div class="section-heading"><div><span class="eyebrow">CONTEXTO DA TELA</span><h1 id="context-heading">Chamado atual</h1></div><span id="read-indicator" class="status-dot"></span></div>
+        <p id="read-status" class="muted">A leitura só começa quando você clicar abaixo.</p>
+        <button id="read-button" class="secondary-button" type="button">Ler chamado visível</button>
+        <dl id="context-fields" class="context-fields" hidden></dl>
+      </section>
+
+      <section class="chat-section" aria-label="Conversa">
+        <div id="messages" class="messages" aria-live="polite">
+          <article class="message assistant"><span class="message-label">ASSISTENTE · SIMULAÇÃO</span><p>Abra um chamado no SysAid e selecione <strong>Ler chamado visível</strong>. Depois pergunte sobre SLA, contrato ou infraestrutura.</p></article>
+        </div>
+        <div class="suggestions" aria-label="Perguntas sugeridas">
+          <button type="button" data-question="Qual é o SLA deste chamado?">SLA</button>
+          <button type="button" data-question="Qual contrato cobre este serviço?">Contrato</button>
+          <button type="button" data-question="Resuma a infraestrutura relacionada">Infraestrutura</button>
+        </div>
+        <form id="chat-form" class="composer">
+          <label class="sr-only" for="question">Sua pergunta</label>
+          <textarea id="question" rows="2" maxlength="500" placeholder="Pergunte sobre este chamado…" required></textarea>
+          <button id="send-button" type="submit" aria-label="Enviar pergunta">↑</button>
+        </form>
+        <p class="disclaimer">Protótipo: respostas simuladas, sem consulta ao SysAid, ERP ou LLM.</p>
+      </section>
+    </main>
+    <script src="sidepanel.js"></script>
+  </body>
+</html>

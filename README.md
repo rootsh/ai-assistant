@@ -4,7 +4,7 @@ Assistente conversacional para analistas de suporte, integrado visualmente ao Sy
 
 ## Escopo atual
 
-Este repositório implementa somente a **Fase 1: fundação do monorepo e ambiente local**. Ainda não há autenticação, agente, integrações SysAid/ERP, RAG, chat, histórico ou deploy OpenShift.
+O repositório contém a fundação local (Fase 1) e um recorte demonstrativo para hackathon: extensão Chrome side panel, leitura acionada de campos visíveis da aba atual e respostas simuladas via FastAPI. Isso não implementa autenticação, agente, integrações reais SysAid/ERP, RAG, histórico persistente ou deploy OpenShift.
 
 ## Pré-requisitos
 
@@ -25,6 +25,8 @@ Readiness: http://localhost:8000/health/ready
 
 O Compose aguarda PostgreSQL e Valkey ficarem saudáveis antes de iniciar a API. Valkey é compatível com o protocolo Redis e tem licença BSD-3-Clause; foi escolhido para preservar o requisito de licenças permissivas.
 
+Para carregar a extensão no Chrome e demonstrar em uma tela SysAid, siga [`docs/demo.md`](docs/demo.md). A extensão pede a leitura somente ao clicar no botão, extrai campos reconhecidos localmente e envia apenas esses campos para `localhost:8000`. As respostas são simuladas.
+
 ## Testes
 
 ```bash
@@ -40,10 +42,10 @@ Os testes da API usam dependências simuladas e não exigem serviços externos.
 
 ```text
 apps/api/                 API FastAPI
+demo/extension/           Extensão Chrome Manifest V3 sem dependências JS
 docs/architecture/        visão e decisões arquiteturais
 tests/                    testes automatizados
 compose.yaml              API, PostgreSQL e Valkey para desenvolvimento
 ```
 
 Consulte `.env.example` para configuração, `docs/architecture/dependencies.md` para dependências e `PLANS.md` para fases futuras. Credenciais locais padrão servem somente para desenvolvimento.
-

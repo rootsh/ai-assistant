@@ -32,11 +32,13 @@ flowchart LR
   API --> Audit[Auditoria]
 ```
 
-O desenho não declara funcionalidades já implementadas. Na Fase 1 só existem API mínima, PostgreSQL, cache local e health checks.
+O desenho não declara funcionalidades já implementadas. A Fase 1 oferece API mínima, PostgreSQL, cache local e health checks. O recorte de hackathon adiciona uma extensão demonstrativa e respostas mock, sem implementar os demais componentes do desenho.
 
-## Fase 1
+## Fase 1 e demonstrador de hackathon
 
-A API mantém pool de conexões PostgreSQL e cliente de cache no ciclo de vida do processo. Liveness mede se o processo responde; readiness verifica `SELECT 1` e `PING`. Nenhuma rota expõe dados de negócio.
+A API mantém pool de conexões PostgreSQL e cliente de cache no ciclo de vida do processo. Liveness mede se o processo responde; readiness verifica `SELECT 1` e `PING`.
+
+No recorte demo, o side panel injeta uma função somente após ação explícita do analista (`activeTab`) e lê um conjunto pequeno de campos visíveis/rotulados da aba. O FastAPI valida o formato permitido e transmite uma resposta estática mock em SSE. Não há chamada a SysAid, ERP, LLM ou banco para compor essa resposta, nem decisão de autorização de negócio.
 
 ## Identificação de chamado e cliente (fases futuras)
 
