@@ -42,7 +42,7 @@ No recorte demo, o side panel injeta uma função somente após ação explícit
 
 ## Identificação de chamado e cliente (fases futuras)
 
-O identificador do chamado fornecido pela extensão deve ser resolvido pelo backend junto ao SysAid. Domínio de e-mail é uma pista de resolução quando a empresa estiver ausente; o resultado precisa ser confirmado por fonte autorizada. Nunca aceitar identificador de cliente como prova de autorização.
+O identificador do chamado fornecido pela extensão (incluindo o parâmetro `id` de `SREdit.jsp`) pode servir como chave de consulta. Nas fases de integração, o backend deve resolver esse identificador junto ao SysAid e aplicar autorização sobre o registro retornado. O número vindo do navegador não é prova de existência nem de autorização. Domínio de e-mail é uma pista de resolução quando a empresa estiver ausente; o resultado precisa ser confirmado por fonte autorizada. Nunca aceitar identificador de cliente como prova de autorização.
 
 ## Implantação (fases futuras)
 
