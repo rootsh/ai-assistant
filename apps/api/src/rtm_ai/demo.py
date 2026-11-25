@@ -36,7 +36,9 @@ class DemoChatRequest(BaseModel):
 
 def _mock_answer(message: str, context: ScreenContext) -> str:
     question = message.casefold()
-    if any(term in question for term in ("suporte", "empresa", "título", "titulo")):
+    if "nível de suporte" in question or "nivel de suporte" in question:
+        answer = "Resposta simulada — nível de suporte contratado: Suporte Premium."
+    elif any(term in question for term in ("suporte", "empresa", "título", "titulo")):
         company = context.customer or "não identificado na tela"
         subject = context.subject or "não identificado na tela"
         support_type = context.support_type or "não identificado na tela"
@@ -44,8 +46,7 @@ def _mock_answer(message: str, context: ScreenContext) -> str:
             "Resposta simulada — dados visíveis do chamado:\n"
             f"Empresa Cliente: {company}\n"
             f"Título: {subject}\n"
-            f"Tipo de suporte: {support_type}\n"
-            "Nível de suporte (mock): Suporte Premium"
+            f"Tipo de suporte: {support_type}"
         )
     elif "sla" in question or "prazo" in question:
         answer = "Resposta simulada: o SLA prioritário de demonstração é de 4 horas úteis."
