@@ -102,6 +102,7 @@ function readVisibleTicketContext() {
     // is not included in document.body.innerText.
     for (const field of document.querySelectorAll("input, textarea")) {
       if (!visible(field)) continue;
+      const parentText = field.parentElement?.parentElement?.innerText || "";
       const nearbyText = [
         field.getAttribute("aria-label"),
         field.getAttribute("name"),
@@ -110,7 +111,7 @@ function readVisibleTicketContext() {
         ...(field.labels || []).map((label) => label.innerText || label.textContent || ""),
         field.parentElement?.innerText,
         field.parentElement?.previousElementSibling?.innerText,
-        field.parentElement?.parentElement?.innerText
+        parentText.length <= 300 ? parentText : ""
       ].filter(Boolean).join(" ");
       const value = readElementValue(field).replace(/\s+/g, " ").trim();
       if (/breve descrição|breve descricao|subject|título do chamado/i.test(nearbyText) && value) {
