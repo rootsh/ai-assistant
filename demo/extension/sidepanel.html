@@ -9,7 +9,7 @@
   <body>
     <header class="brand">
       <div class="brand-mark">RTM</div>
-      <div><strong>AI Assistant</strong><small>Demo para SysAid · <span id="build-version">v0.0.1.b2</span></small></div>
+      <div><strong>AI Assistant</strong><small>Demo para SysAid · <span id="build-version">v0.0.1.b3</span></small></div>
       <span class="demo-pill">MOCK</span>
     </header>
 
@@ -19,6 +19,11 @@
         <p id="read-status" class="muted">Autorize o domínio SysAid uma vez; depois, leia um chamado aberto na aba.</p>
         <button id="authorize-button" class="secondary-button" type="button">Autorizar acesso ao SysAid</button>
         <button id="read-button" class="secondary-button" type="button" disabled>Ler chamado visível</button>
+        <div class="debug-controls">
+          <button id="debug-toggle" class="debug-button" type="button" aria-pressed="false">Debug: desligado</button>
+          <button id="copy-debug" class="debug-button" type="button" hidden>Copiar log</button>
+        </div>
+        <textarea id="debug-log" class="debug-log" rows="6" readonly hidden aria-label="Log de diagnóstico"></textarea>
         <dl id="context-fields" class="context-fields" hidden></dl>
       </section>
 
