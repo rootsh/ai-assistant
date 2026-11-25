@@ -39,6 +39,13 @@ function readVisibleTicketContext() {
     return style.display !== "none" && style.visibility !== "hidden" && rect.width > 0 && rect.height > 0;
   };
   const values = {};
+  const pageUrl = new URL(location.href);
+  if (/\/SREdit\.jsp$/i.test(pageUrl.pathname)) {
+    const requestId = pageUrl.searchParams.get("id");
+    if (requestId && /^[A-Za-z0-9_-]{1,80}$/.test(requestId)) {
+      values.ticket_id = requestId;
+    }
+  }
   const setValue = (label, value) => {
     const key = Object.keys(aliases).find((candidate) => aliases[candidate].includes(normalize(label)));
     const clean = (value || "").replace(/\s+/g, " ").trim();
