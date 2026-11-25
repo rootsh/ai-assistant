@@ -126,6 +126,7 @@ def test_demo_chat_streams_a_mock_answer_with_screen_context() -> None:
     assert "Empresa Cliente: IUGU" in streamed_text
     assert "Título: NAT CloudLink p/ SLC" in streamed_text
     assert "Tipo de suporte: Suporte Técnico TI" in streamed_text
+    assert "Nível de suporte (mock): Suporte Premium" in streamed_text
     assert "INC-2048" in streamed_text
 
 
