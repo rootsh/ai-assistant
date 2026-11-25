@@ -151,29 +151,6 @@ function readVisibleTicketContext(includeDiagnostics = false) {
   };
 }
 
-debugToggle.addEventListener("click", () => {
-  debugEnabled = !debugEnabled;
-  debugToggle.textContent = `Debug: ${debugEnabled ? "ligado" : "desligado"}`;
-  debugToggle.setAttribute("aria-pressed", String(debugEnabled));
-  debugLog.hidden = !debugEnabled;
-  copyDebugButton.hidden = !debugEnabled;
-  if (debugEnabled && !lastDebugReport) {
-    debugLog.value = "Ativei o debug. Clique em “Ler chamado visível” para gerar o log.";
-  }
-});
-
-copyDebugButton.addEventListener("click", async () => {
-  if (!debugLog.value) return;
-  try {
-    await navigator.clipboard.writeText(debugLog.value);
-    copyDebugButton.textContent = "Log copiado";
-  } catch {
-    debugLog.focus();
-    debugLog.select();
-    copyDebugButton.textContent = "Log selecionado — copie";
-  }
-});
-
 if (!globalThis.__rtmTicketReaderInstalled) {
   globalThis.__rtmTicketReaderInstalled = true;
   chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
