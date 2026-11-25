@@ -210,13 +210,18 @@ readButton.addEventListener("click", async () => {
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (!tab?.id) throw new Error("Não encontrei uma aba ativa.");
-    const [{ result }] = await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
+    const frameResults = await chrome.scripting.executeScript({
+      target: { tabId: tab.id, allFrames: true },
       func: readVisibleTicketContext
     });
-    const context = result && typeof result === "object" ? result : {};
-    // Preserve the ticket ID from the current URL if a page-specific extractor
-    // returns no object; this ID is display context, never authorization.
+    const context = {};
+    for (const { result } of frameResults) {
+      if (!result || typeof result !== "object") continue;
+      for (const [key, value] of Object.entries(result)) {
+        if (value && !context[key]) context[key] = value;
+      }
+    }
+    // Preserve the ticket ID from the URL when the ticket is rendered in a frame.
     if (!context.ticket_id && tab.url) {
       const pageUrl = new URL(tab.url);
       const requestId = pageUrl.searchParams.get("id");
