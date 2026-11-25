@@ -34,7 +34,7 @@ function readVisibleTicketContext() {
     priority: ["priority", "prioridade"],
     status: ["status", "state", "situação", "estado"]
   };
-  const normalize = (value) => (value || "").replace(/\s+/g, " ").trim().replace(/:$/, "").toLocaleLowerCase();
+  const normalize = (value) => (value || "").replace(/[⋮…]/g, "").replace(/\s+/g, " ").trim().replace(/:$/, "").toLocaleLowerCase();
   const visible = (element) => {
     const style = window.getComputedStyle(element);
     const rect = element.getBoundingClientRect();
@@ -70,10 +70,23 @@ function readVisibleTicketContext() {
   // Extract only recognized label/value pairs from visible text; never send the full page.
   const visibleLines = (document.body?.innerText || "").split("\n").slice(0, 500);
   for (let index = 0; index < visibleLines.length; index += 1) {
-    const line = visibleLines[index];
+    const line = visibleLines[index].replace(/[⋮…]/g, "").trim();
     const separator = line.indexOf(":");
-    if (separator > 0) setValue(line.slice(0, separator), line.slice(separator + 1));
-    else setValue(line, visibleLines[index + 1] || "");
+    if (separator > 0) {
+      setValue(line.slice(0, separator), line.slice(separator + 1));
+      continue;
+    }
+    const normalizedLine = normalize(line);
+    const matchedLabel = Object.entries(aliases)
+      .flatMap(([key, names]) => names.map((name) => ({ key, name })))
+      .filter(({ name }) => normalizedLine === name || normalizedLine.startsWith(name + " "))
+      .sort((left, right) => right.name.length - left.name.length)[0];
+    if (matchedLabel) {
+      const remainder = line.slice(matchedLabel.name.length).replace(/^\s+/, "");
+      setValue(matchedLabel.name, remainder || visibleLines[index + 1] || "");
+    } else {
+      setValue(line, visibleLines[index + 1] || "");
+    }
   }
 
   // SysAid renders the selected service category in a visible form control.
@@ -84,8 +97,15 @@ function readVisibleTicketContext() {
   }
 
   if (!values.subject) {
-    const heading = document.querySelector("h1");
+    const heading = document.querySelector("h1, h2");
     if (heading && visible(heading)) values.subject = (heading.innerText || heading.textContent || "").trim().slice(0, 160);
+  }
+  if (!values.subject) {
+    const descriptionLabel = [...document.querySelectorAll("label, th, dt, div, span, strong, b")]
+      .find((element) => visible(element) && normalize(element.innerText || element.textContent) === "breve descrição");
+    const nearbyText = descriptionLabel?.parentElement?.innerText || "";
+    const match = nearbyText.match(/breve descrição\s*([\s\S]{0,180})/i);
+    if (match?.[1]?.trim()) values.subject = match[1].trim().split("\n")[0].trim().slice(0, 160);
   }
 
   return {
@@ -130,7 +150,12 @@ function renderContext(context) {
     dd.textContent = context[key];
     contextFields.append(dt, dd);
   }
-  contextFields.hidden = contextFields.childElementCount === 0;
+  const supportLevelLabel = document.createElement("dt");
+  supportLevelLabel.textContent = "Nível de suporte (mock)";
+  const supportLevel = document.createElement("dd");
+  supportLevel.textContent = "Suporte Premium";
+  contextFields.append(supportLevelLabel, supportLevel);
+  contextFields.hidden = false;
 }
 
 function addMessage(kind, text = "") {
