@@ -142,6 +142,7 @@ function readVisibleTicketContext(includeDiagnostics = false) {
       textLength: (document.body?.innerText || "").length,
       fieldCount: Object.values(values).filter(Boolean).length,
       fields: Object.keys(values).filter((key) => values[key]),
+      readerInstalled: true,
       inputs: document.querySelectorAll("input").length,
       textareas: document.querySelectorAll("textarea").length,
       selects: document.querySelectorAll("select").length,
@@ -151,17 +152,4 @@ function readVisibleTicketContext(includeDiagnostics = false) {
   };
 }
 
-if (!globalThis.__rtmTicketReaderInstalled) {
-  globalThis.__rtmTicketReaderInstalled = true;
-  chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-    if (message?.type !== "RTM_READ_VISIBLE_CONTEXT") return false;
-    const context = readVisibleTicketContext(Boolean(message.debug));
-    void chrome.runtime.sendMessage({
-      type: "RTM_VISIBLE_CONTEXT_RESULT",
-      requestId: message.requestId,
-      context
-    });
-    sendResponse({ ok: true });
-    return false;
-  });
-}
+globalThis.__rtmReadVisibleTicketContext = readVisibleTicketContext;
