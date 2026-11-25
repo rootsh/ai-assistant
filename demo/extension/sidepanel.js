@@ -22,6 +22,13 @@ const labels = {
 };
 
 function readVisibleTicketContext() {
+  // Keep extraction limited to SysAid hosts while tolerating tenant TLD variants.
+  if (!location.hostname.toLowerCase().includes("sysaidit")) {
+    return {
+      ticket_id: null, subject: null, customer: null, support_type: null,
+      requester: null, priority: null, status: null
+    };
+  }
   const aliases = {
     ticket_id: ["id", "ticket id", "case id", "número", "número do chamado", "id do chamado", "chamado", "solicitação"],
     subject: ["subject", "title", "assunto", "título", "resumo", "breve descrição", "breve descricao"],
