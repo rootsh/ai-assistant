@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "RTM AI Assistant — Demo",
-  "version": "0.1.1",
-  "version_name": "0.0.1.b2",
+  "version": "0.1.2",
+  "version_name": "0.0.1.b3",
   "description": "Demonstra leitura explícita de campos visíveis da aba atual e chat simulado.",
   "minimum_chrome_version": "116",
   "icons": {
