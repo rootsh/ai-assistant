@@ -8,8 +8,13 @@ const messages = document.querySelector("#messages");
 const form = document.querySelector("#chat-form");
 const questionInput = document.querySelector("#question");
 const sendButton = document.querySelector("#send-button");
+const debugToggle = document.querySelector("#debug-toggle");
+const copyDebugButton = document.querySelector("#copy-debug");
+const debugLog = document.querySelector("#debug-log");
 
 let screenContext = null;
+let debugEnabled = false;
+let lastDebugReport = null;
 const buildVersion = document.querySelector("#build-version");
 if (buildVersion) {
   const manifest = chrome.runtime.getManifest();
@@ -26,11 +31,21 @@ const labels = {
   status: "Status"
 };
 
-function readVisibleTicketContext() {
+function readVisibleTicketContext(includeDiagnostics = false) {
   const emptyContext = () => ({
     ticket_id: null, subject: null, customer: null, support_type: null,
     requester: null, priority: null, status: null,
-    __diagnostics: { host: location.hostname, textLength: 0, fieldCount: 0 }
+    __diagnostics: includeDiagnostics ? {
+      host: location.hostname,
+      path: location.pathname,
+      textLength: (document.body?.innerText || "").length,
+      fieldCount: 0,
+      inputs: document.querySelectorAll("input").length,
+      textareas: document.querySelectorAll("textarea").length,
+      selects: document.querySelectorAll("select").length,
+      headings: document.querySelectorAll("h1, h2").length,
+      iframes: document.querySelectorAll("iframe").length
+    } : null
   });
   // Keep extraction limited to SysAid hosts while tolerating tenant TLD variants.
   if (!location.hostname.toLowerCase().includes("sysaidit")) return emptyContext();
@@ -153,13 +168,43 @@ function readVisibleTicketContext() {
     requester: values.requester || null,
     priority: values.priority || null,
     status: values.status || null,
-    __diagnostics: {
+    __diagnostics: includeDiagnostics ? {
       host: location.hostname,
+      path: location.pathname,
       textLength: (document.body?.innerText || "").length,
-      fieldCount: Object.values(values).filter(Boolean).length
-    }
+      fieldCount: Object.values(values).filter(Boolean).length,
+      fields: Object.keys(values).filter((key) => values[key]),
+      inputs: document.querySelectorAll("input").length,
+      textareas: document.querySelectorAll("textarea").length,
+      selects: document.querySelectorAll("select").length,
+      headings: document.querySelectorAll("h1, h2").length,
+      iframes: document.querySelectorAll("iframe").length
+    } : null
   };
 }
+
+debugToggle.addEventListener("click", () => {
+  debugEnabled = !debugEnabled;
+  debugToggle.textContent = `Debug: ${debugEnabled ? "ligado" : "desligado"}`;
+  debugToggle.setAttribute("aria-pressed", String(debugEnabled));
+  debugLog.hidden = !debugEnabled;
+  copyDebugButton.hidden = !debugEnabled;
+  if (debugEnabled && !lastDebugReport) {
+    debugLog.value = "Ativei o debug. Clique em “Ler chamado visível” para gerar o log.";
+  }
+});
+
+copyDebugButton.addEventListener("click", async () => {
+  if (!debugLog.value) return;
+  try {
+    await navigator.clipboard.writeText(debugLog.value);
+    copyDebugButton.textContent = "Log copiado";
+  } catch {
+    debugLog.focus();
+    debugLog.select();
+    copyDebugButton.textContent = "Log selecionado — copie";
+  }
+});
 
 authorizeButton.addEventListener("click", async () => {
   authorizeButton.disabled = true;
@@ -222,7 +267,8 @@ readButton.addEventListener("click", async () => {
     if (!tab?.id) throw new Error("Não encontrei uma aba ativa.");
     const frameResults = await chrome.scripting.executeScript({
       target: { tabId: tab.id, allFrames: true },
-      func: readVisibleTicketContext
+      func: readVisibleTicketContext,
+      args: [debugEnabled]
     });
     const context = {};
     const frameDiagnostics = [];
@@ -250,8 +296,21 @@ readButton.addEventListener("click", async () => {
     readStatus.textContent = fieldCount
       ? detailFields
         ? `${fieldCount} campo(s) capturado(s). Somente os valores selecionados são enviados à API local.`
-        : `${fieldCount} campo(s) capturado(s), mas os campos do formulário não foram lidos. Frames: ${frameDiagnostics.map((item) => item.host).join(", ") || "nenhum"}; texto visível: ${frameDiagnostics.map((item) => item.textLength).join("/") || "0"} caracteres.`
-      : `Não encontrei campos de chamado. Frames: ${frameDiagnostics.map((item) => item.host).join(", ") || "nenhum"}.`;
+        : `${fieldCount} campo(s) capturado(s), mas os campos do formulário não foram lidos. Ative o Debug para ver o diagnóstico.`
+      : `Não encontrei campos de chamado. Ative o Debug para ver o diagnóstico.`;
+    if (debugEnabled) {
+      const permissions = await chrome.permissions.getAll();
+      const page = tab.url ? new URL(tab.url) : null;
+      lastDebugReport = {
+        build: chrome.runtime.getManifest().version_name || chrome.runtime.getManifest().version,
+        tab: page ? `${page.origin}${page.pathname}` : null,
+        grantedSysAidOrigins: (permissions.origins || []).filter((origin) => origin.toLowerCase().includes("sysaidit")),
+        framesReturned: frameResults.length,
+        frames: frameDiagnostics,
+        mergedFields: Object.keys(context).filter((key) => context[key])
+      };
+      debugLog.value = JSON.stringify(lastDebugReport, null, 2);
+    }
     readIndicator.classList.toggle("ready", fieldCount > 0);
   } catch (error) {
     readStatus.textContent = `Não foi possível ler esta aba: ${error.message}`;
