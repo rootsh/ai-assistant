@@ -98,21 +98,27 @@ def test_demo_chat_streams_a_mock_answer_with_screen_context() -> None:
         app = create_app(pool_factory=pool_factory, redis_factory=redis_factory)
         async with app.router.lifespan_context(app):
             async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-                return await client.post(
+                screen_context = {
+                    "ticket_id": "INC-2048",
+                    "subject": "NAT CloudLink p/ SLC",
+                    "customer": "IUGU",
+                    "support_type": "Suporte Técnico TI",
+                    "status": "Em andamento",
+                }
+                details = await client.post(
                     "/api/demo/chat",
                     json={
                         "message": "Qual é o tipo de suporte contratado, o nome da empresa e o título do chamado?",
-                        "screen_context": {
-                            "ticket_id": "INC-2048",
-                            "subject": "NAT CloudLink p/ SLC",
-                            "customer": "IUGU",
-                            "support_type": "Suporte Técnico TI",
-                            "status": "Em andamento",
-                        },
+                        "screen_context": screen_context,
                     },
                 )
+                support_level = await client.post(
+                    "/api/demo/chat",
+                    json={"message": "Qual é o nível de suporte contratado?", "screen_context": screen_context},
+                )
+                return details, support_level
 
-    response = asyncio.run(run_demo())
+    response, support_response = asyncio.run(run_demo())
 
     assert response.status_code == 200
     assert response.headers["content-type"].startswith("text/event-stream")
@@ -126,8 +132,15 @@ def test_demo_chat_streams_a_mock_answer_with_screen_context() -> None:
     assert "Empresa Cliente: IUGU" in streamed_text
     assert "Título: NAT CloudLink p/ SLC" in streamed_text
     assert "Tipo de suporte: Suporte Técnico TI" in streamed_text
-    assert "Nível de suporte (mock): Suporte Premium" in streamed_text
     assert "INC-2048" in streamed_text
+    level_tokens = [
+        json.loads(line[6:])["text"]
+        for line in support_response.text.splitlines()
+        if line.startswith("data: ") and '"token"' in line
+    ]
+    level_text = "".join(level_tokens)
+    assert "nível de suporte contratado: Suporte Premium" in level_text
+    assert "Empresa Cliente: IUGU" not in level_text
 
 
 def test_demo_chat_rejects_unallowlisted_page_content() -> None:
