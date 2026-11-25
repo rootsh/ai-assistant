@@ -94,7 +94,14 @@ function readVisibleTicketContext(includeDiagnostics = false) {
   if (!values.subject) {
     // SysAid may render "Breve descrição" as a label next to an input whose value
     // is not included in document.body.innerText.
-    for (const field of document.querySelectorAll("input, textarea")) {
+    const associatedLabelText = (field) => {
+    try {
+      return Array.from(field.labels || [], (label) => label.innerText || label.textContent || "");
+    } catch {
+      return [];
+    }
+  };
+  for (const field of document.querySelectorAll("input, textarea")) {
       if (!visible(field)) continue;
       const parentText = field.parentElement?.parentElement?.innerText || "";
       const nearbyText = [
@@ -102,7 +109,7 @@ function readVisibleTicketContext(includeDiagnostics = false) {
         field.getAttribute("name"),
         field.id,
         field.getAttribute("placeholder"),
-        ...(field.labels || []).map((label) => label.innerText || label.textContent || ""),
+        ...associatedLabelText(field),
         field.parentElement?.innerText,
         field.parentElement?.previousElementSibling?.innerText,
         parentText.length <= 300 ? parentText : ""
