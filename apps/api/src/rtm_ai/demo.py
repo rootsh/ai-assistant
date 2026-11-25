@@ -44,7 +44,8 @@ def _mock_answer(message: str, context: ScreenContext) -> str:
             "Resposta simulada — dados visíveis do chamado:\n"
             f"Empresa Cliente: {company}\n"
             f"Título: {subject}\n"
-            f"Tipo de suporte: {support_type}"
+            f"Tipo de suporte: {support_type}\n"
+            "Nível de suporte (mock): Suporte Premium"
         )
     elif "sla" in question or "prazo" in question:
         answer = "Resposta simulada: o SLA prioritário de demonstração é de 4 horas úteis."
