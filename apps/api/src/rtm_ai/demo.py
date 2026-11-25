@@ -21,6 +21,7 @@ class ScreenContext(BaseModel):
     ticket_id: str | None = Field(default=None, max_length=80)
     subject: str | None = Field(default=None, max_length=240)
     customer: str | None = Field(default=None, max_length=160)
+    support_type: str | None = Field(default=None, max_length=120)
     requester: str | None = Field(default=None, max_length=160)
     priority: str | None = Field(default=None, max_length=80)
     status: str | None = Field(default=None, max_length=80)
@@ -35,7 +36,17 @@ class DemoChatRequest(BaseModel):
 
 def _mock_answer(message: str, context: ScreenContext) -> str:
     question = message.casefold()
-    if "sla" in question or "prazo" in question:
+    if any(term in question for term in ("suporte", "empresa", "título", "titulo")):
+        company = context.customer or "não identificado na tela"
+        subject = context.subject or "não identificado na tela"
+        support_type = context.support_type or "não identificado na tela"
+        answer = (
+            "Resposta simulada — dados visíveis do chamado:\n"
+            f"Empresa Cliente: {company}\n"
+            f"Título: {subject}\n"
+            f"Tipo de suporte: {support_type}"
+        )
+    elif "sla" in question or "prazo" in question:
         answer = "Resposta simulada: o SLA prioritário de demonstração é de 4 horas úteis."
     elif "contrato" in question or "produto" in question:
         answer = "Resposta simulada: contrato DEMO-2026-014, cobertura padrão e produto Workplace."
@@ -45,8 +56,7 @@ def _mock_answer(message: str, context: ScreenContext) -> str:
         answer = "Resposta simulada: encontrei o contexto visível do chamado. Consulte SLA, contrato ou infraestrutura para ver exemplos."
 
     ticket = context.ticket_id or "não identificado na tela"
-    subject = context.subject or "assunto não identificado"
-    return f"{answer}\n\nContexto lido da tela: chamado {ticket} — {subject}."
+    return f"{answer}\n\nContexto lido da tela: chamado {ticket}."
 
 
 @router.post("/chat", summary="Responde com dados simulados para a demo")

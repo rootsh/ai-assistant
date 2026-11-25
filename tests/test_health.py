@@ -101,10 +101,12 @@ def test_demo_chat_streams_a_mock_answer_with_screen_context() -> None:
                 return await client.post(
                     "/api/demo/chat",
                     json={
-                        "message": "Qual é o SLA?",
+                        "message": "Qual é o tipo de suporte contratado, o nome da empresa e o título do chamado?",
                         "screen_context": {
                             "ticket_id": "INC-2048",
-                            "subject": "Acesso VPN indisponível",
+                            "subject": "NAT CloudLink p/ SLC",
+                            "customer": "IUGU",
+                            "support_type": "Suporte Técnico TI",
                             "status": "Em andamento",
                         },
                     },
@@ -121,7 +123,9 @@ def test_demo_chat_streams_a_mock_answer_with_screen_context() -> None:
     ]
     streamed_text = "".join(tokens)
     assert "Resposta simulada" in streamed_text
-    assert "4 horas úteis" in streamed_text
+    assert "Empresa Cliente: IUGU" in streamed_text
+    assert "Título: NAT CloudLink p/ SLC" in streamed_text
+    assert "Tipo de suporte: Suporte Técnico TI" in streamed_text
     assert "INC-2048" in streamed_text
 
 

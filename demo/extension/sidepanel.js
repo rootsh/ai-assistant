@@ -15,6 +15,7 @@ const labels = {
   ticket_id: "Chamado",
   subject: "Assunto",
   customer: "Empresa/cliente",
+  support_type: "Tipo de suporte",
   requester: "Solicitante",
   priority: "Prioridade",
   status: "Status"
@@ -26,9 +27,10 @@ function readVisibleTicketContext() {
   }
   const aliases = {
     ticket_id: ["id", "ticket id", "case id", "número", "número do chamado", "id do chamado", "chamado", "solicitação"],
-    subject: ["subject", "title", "assunto", "título", "resumo"],
-    customer: ["customer", "company", "organization", "cliente", "empresa", "organização"],
-    requester: ["requester", "contact", "reported by", "solicitante", "contato", "usuário", "email", "e-mail"],
+    subject: ["subject", "title", "assunto", "título", "resumo", "breve descrição", "breve descricao"],
+    customer: ["customer", "company", "organization", "cliente", "empresa", "empresa cliente", "organização"],
+    support_type: ["support type", "tipo de suporte", "tipo do suporte", "tipo de suporte contratado", "suporte contratado"],
+    requester: ["requester", "contact", "reported by", "solicitante", "contato", "usuário", "usuário solicitante", "email", "e-mail"],
     priority: ["priority", "prioridade"],
     status: ["status", "state", "situação", "estado"]
   };
@@ -66,15 +68,31 @@ function readVisibleTicketContext() {
   }
 
   // Extract only recognized label/value pairs from visible text; never send the full page.
-  for (const line of (document.body?.innerText || "").split("\n").slice(0, 500)) {
+  const visibleLines = (document.body?.innerText || "").split("\n").slice(0, 500);
+  for (let index = 0; index < visibleLines.length; index += 1) {
+    const line = visibleLines[index];
     const separator = line.indexOf(":");
     if (separator > 0) setValue(line.slice(0, separator), line.slice(separator + 1));
+    else setValue(line, visibleLines[index + 1] || "");
+  }
+
+  // SysAid renders the selected service category in a visible form control.
+  for (const field of document.querySelectorAll("input, textarea, select")) {
+    if (!visible(field) || values.support_type) continue;
+    const value = readElementValue(field).replace(/\s+/g, " ").trim();
+    if (/suporte técnico/i.test(value)) values.support_type = value.slice(0, 120);
+  }
+
+  if (!values.subject) {
+    const heading = document.querySelector("h1");
+    if (heading && visible(heading)) values.subject = (heading.innerText || heading.textContent || "").trim().slice(0, 160);
   }
 
   return {
     ticket_id: values.ticket_id || null,
     subject: values.subject || null,
     customer: values.customer || null,
+    support_type: values.support_type || null,
     requester: values.requester || null,
     priority: values.priority || null,
     status: values.status || null
