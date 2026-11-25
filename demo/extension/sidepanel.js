@@ -22,9 +22,7 @@ const labels = {
 };
 
 function readVisibleTicketContext() {
-  if (location.hostname !== "rtm.sysaidit.com") {
-    throw new Error("Esta demo está configurada para rtm.sysaidit.com.");
-  }
+  if (location.hostname !== "rtm.sysaidit.com") return null;
   const aliases = {
     ticket_id: ["id", "ticket id", "case id", "número", "número do chamado", "id do chamado", "chamado", "solicitação"],
     subject: ["subject", "title", "assunto", "título", "resumo", "breve descrição", "breve descricao"],
@@ -178,10 +176,17 @@ readButton.addEventListener("click", async () => {
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (!tab?.id) throw new Error("Não encontrei uma aba ativa.");
-    const [{ result: context }] = await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
+    const frameResults = await chrome.scripting.executeScript({
+      target: { tabId: tab.id, allFrames: true },
       func: readVisibleTicketContext
     });
+    const context = {};
+    for (const { result } of frameResults) {
+      if (!result) continue;
+      for (const [key, value] of Object.entries(result)) {
+        if (value && !context[key]) context[key] = value;
+      }
+    }
     screenContext = context;
     renderContext(context);
     const fieldCount = Object.values(context).filter(Boolean).length;
