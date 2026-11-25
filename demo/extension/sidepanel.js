@@ -210,11 +210,20 @@ readButton.addEventListener("click", async () => {
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (!tab?.id) throw new Error("Não encontrei uma aba ativa.");
-    const [{ result: context }] = await chrome.scripting.executeScript({
+    const [{ result }] = await chrome.scripting.executeScript({
       target: { tabId: tab.id },
       func: readVisibleTicketContext
     });
-    if (!context) throw new Error("A aba não retornou contexto de chamado. Confira o domínio e tente novamente.");
+    const context = result && typeof result === "object" ? result : {};
+    // Preserve the ticket ID from the current URL if a page-specific extractor
+    // returns no object; this ID is display context, never authorization.
+    if (!context.ticket_id && tab.url) {
+      const pageUrl = new URL(tab.url);
+      const requestId = pageUrl.searchParams.get("id");
+      if (/\/SREdit\.jsp$/i.test(pageUrl.pathname) && requestId && /^[A-Za-z0-9_-]{1,80}$/.test(requestId)) {
+        context.ticket_id = requestId;
+      }
+    }
     screenContext = context;
     renderContext(context);
     const fieldCount = Object.values(context).filter(Boolean).length;
