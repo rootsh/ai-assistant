@@ -98,15 +98,39 @@ function readVisibleTicketContext() {
   }
 
   if (!values.subject) {
-    const heading = document.querySelector("h1, h2");
-    if (heading && visible(heading)) values.subject = (heading.innerText || heading.textContent || "").trim().slice(0, 160);
+    // SysAid may render "Breve descrição" as a label next to an input whose value
+    // is not included in document.body.innerText.
+    for (const field of document.querySelectorAll("input, textarea")) {
+      if (!visible(field)) continue;
+      const nearbyText = [
+        field.getAttribute("aria-label"),
+        field.getAttribute("name"),
+        field.id,
+        field.getAttribute("placeholder"),
+        ...(field.labels || []).map((label) => label.innerText || label.textContent || ""),
+        field.parentElement?.innerText,
+        field.parentElement?.previousElementSibling?.innerText,
+        field.parentElement?.parentElement?.innerText
+      ].filter(Boolean).join(" ");
+      const value = readElementValue(field).replace(/\s+/g, " ").trim();
+      if (/breve descrição|breve descricao|subject|título do chamado/i.test(nearbyText) && value) {
+        values.subject = value.slice(0, 160);
+        break;
+      }
+    }
   }
   if (!values.subject) {
-    const descriptionLabel = [...document.querySelectorAll("label, th, dt, div, span, strong, b")]
-      .find((element) => visible(element) && normalize(element.innerText || element.textContent) === "breve descrição");
-    const nearbyText = descriptionLabel?.parentElement?.innerText || "";
-    const match = nearbyText.match(/breve descrição\s*([\s\S]{0,180})/i);
-    if (match?.[1]?.trim()) values.subject = match[1].trim().split("\n")[0].trim().slice(0, 160);
+    const headings = [...document.querySelectorAll("h1, h2")].filter(visible);
+    const heading = headings.find((element) => (element.innerText || element.textContent || "").trim());
+    if (heading) values.subject = (heading.innerText || heading.textContent || "").trim().slice(0, 160);
+  }
+  if (!values.subject) {
+    const lines = (document.body?.innerText || "").split("\n").map((line) => line.trim()).filter(Boolean);
+    const ticketIndex = lines.findIndex((line) => values.ticket_id && line.includes(values.ticket_id) && /incidente|chamado|solicitação/i.test(line));
+    const candidate = ticketIndex >= 0 ? lines[ticketIndex + 1] : "";
+    if (candidate && candidate.length <= 160 && !/^(cancelar|aplicar|salvar|ações?)$/i.test(candidate)) {
+      values.subject = candidate;
+    }
   }
 
   return {
