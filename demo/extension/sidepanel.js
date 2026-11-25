@@ -156,7 +156,7 @@ authorizeButton.addEventListener("click", async () => {
   try {
     // The optional host permission is requested immediately from this click gesture.
     const granted = await chrome.permissions.request({
-      origins: ["https://rtm.sysaidit.com/*"]
+      origins: ["https://*.sysaidit.com/*"]
     });
     if (!granted) {
       readStatus.textContent = "O Chrome não concedeu acesso. Você pode autorizar depois por este botão.";
