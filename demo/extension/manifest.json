@@ -1,7 +1,8 @@
 {
   "manifest_version": 3,
   "name": "RTM AI Assistant — Demo",
-  "version": "0.1.0",
+  "version": "0.0.1.2",
+  "version_name": "0.0.1.b2",
   "description": "Demonstra leitura explícita de campos visíveis da aba atual e chat simulado.",
   "minimum_chrome_version": "116",
   "icons": {
@@ -11,7 +12,7 @@
     "128": "icons/icon128.png"
   },
   "permissions": ["activeTab", "scripting", "sidePanel"],
-  "optional_host_permissions": ["https://*.sysaidit.com/*"],
+  "optional_host_permissions": ["https://*.sysaidit.com/*", "https://rtm.sysaidit.co/*"],
   "host_permissions": ["http://localhost:8000/*"],
   "background": {
     "service_worker": "service-worker.js",
