@@ -48,7 +48,10 @@ function readVisibleTicketContext() {
   }
   const setValue = (label, value) => {
     const key = Object.keys(aliases).find((candidate) => aliases[candidate].includes(normalize(label)));
-    const clean = (value || "").replace(/\s+/g, " ").trim();
+    const rawValue = (value || "").replace(/\s+/g, " ").trim();
+    const clean = key === "requester"
+      ? rawValue.replace(/^contato\s*[:：-]?\s*/i, "").trim()
+      : rawValue;
     if (key && clean && clean.length <= 240 && !values[key]) values[key] = clean;
   };
   const readElementValue = (element) => {
