@@ -151,6 +151,7 @@ readButton.addEventListener("click", async () => {
         grantedSysAidOrigins: (permissions.origins || []).filter((origin) => origin.toLowerCase().includes("sysaidit")),
         injectionFrames: frameResults.injectionFrames || 0,
         injectionError: frameResults.injectionError,
+        evaluationError: frameResults.evaluationError,
         framesReturned: frameResults.length,
         frames: frameDiagnostics,
         mergedFields: Object.keys(context).filter((key) => context[key])
@@ -167,14 +168,6 @@ readButton.addEventListener("click", async () => {
 });
 
 async function collectFrameContexts(tabId) {
-  const requestId = `rtm-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-  const responses = [];
-  const listener = (message, sender) => {
-    if (message?.type === "RTM_VISIBLE_CONTEXT_RESULT" && message.requestId === requestId) {
-      responses.push({ result: message.context, frameId: sender.frameId });
-    }
-  };
-  chrome.runtime.onMessage.addListener(listener);
   let injectionFrames = 0;
   let injectionError = null;
   try {
@@ -186,26 +179,42 @@ async function collectFrameContexts(tabId) {
   } catch (error) {
     injectionError = error.message;
   }
-  let dispatchError = null;
+
+  let frameResults = [];
+  let evaluationError = null;
   try {
-    await chrome.tabs.sendMessage(tabId, {
-      type: "RTM_READ_VISIBLE_CONTEXT",
-      requestId,
-      debug: debugEnabled
+    frameResults = await chrome.scripting.executeScript({
+      target: { tabId, allFrames: true },
+      func: (includeDiagnostics) => {
+        const reader = globalThis.__rtmReadVisibleTicketContext;
+        if (typeof reader === "function") return reader(includeDiagnostics);
+        return {
+          ticket_id: null,
+          subject: null,
+          customer: null,
+          support_type: null,
+          requester: null,
+          priority: null,
+          status: null,
+          __diagnostics: includeDiagnostics ? {
+            host: location.hostname,
+            path: location.pathname || "blank",
+            textLength: (document.body?.innerText || "").length,
+            readerInstalled: false
+          } : null
+        };
+      },
+      args: [debugEnabled]
     });
   } catch (error) {
-    dispatchError = error.message;
+    evaluationError = error.message;
   }
-  await new Promise((resolve) => setTimeout(resolve, 300));
-  chrome.runtime.onMessage.removeListener(listener);
-  responses.injectionFrames = injectionFrames;
-  responses.injectionError = injectionError;
-  if (!responses.length) {
-    throw new Error(
-      `Nenhum content script respondeu. Injeção: ${injectionFrames} frame(s)${injectionError ? ` (${injectionError})` : ""}; mensagem: ${dispatchError || "sem resposta"}.`
-    );
-  }
-  return responses;
+
+  const results = frameResults.map(({ result, frameId }) => ({ result, frameId }));
+  results.injectionFrames = injectionFrames;
+  results.injectionError = injectionError;
+  results.evaluationError = evaluationError;
+  return results;
 }
 
 async function sendQuestion(question) {
