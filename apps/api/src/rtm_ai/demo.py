@@ -51,7 +51,7 @@ def _mock_answer(message: str, context: ScreenContext) -> str:
     elif "sla" in question or "prazo" in question:
         answer = "Resposta simulada: o SLA prioritário de demonstração é de 4 horas úteis."
     elif "contrato" in question or "produto" in question:
-        answer = "Resposta simulada: contrato DEMO-2026-014, cobertura padrão e produto Workplace."
+        answer = "Resposta simulada: contrato DEMO-2026-014 com os produtos Cloudlink, RSFN e RCS."
     elif "infra" in question or "servidor" in question:
         answer = "Resposta simulada: serviço de demonstração hospedado no ambiente corporativo."
     else:
