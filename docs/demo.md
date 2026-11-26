@@ -19,13 +19,13 @@ A API fica em `http://localhost:8000`; readiness em `/health/ready`. PostgreSQL 
 
 ## O que a extensão lê
 
-A leitura só é acionada pelo analista. A permissão opcional de host é pedida após clique explícito e limitada a `https://rtm.sysaidit.com/*`; o padrão cobre páginas como `/SREdit.jsp?pageID=4&id=15261`. Chrome mantém essa permissão até ser revogada em `chrome://extensions`. `scripting` injeta a função somente após **Ler chamado visível**. A extensão captura somente o parâmetro `id` em páginas `SREdit.jsp` e o mostra no side panel. Não tenta ler os outros campos do formulário. O payload envia somente o ID e a pergunta para o FastAPI local; não envia a URL completa, texto integral da página, HTML, cookies ou screenshots.
+O painel oferece os modos **SysAid** e **Geral**. No modo Geral, o analista pode fazer perguntas abertas sem usar o contexto de chamado. A leitura do chamado só é acionada no modo SysAid pelo analista. A permissão opcional de host é pedida após clique explícito e limitada a `https://rtm.sysaidit.com/*`; o padrão cobre páginas como `/SREdit.jsp?pageID=4&id=15261`. Chrome mantém essa permissão até ser revogada em `chrome://extensions`. `scripting` injeta a função somente após **Ler chamado visível**. No modo SysAid, a extensão captura somente o parâmetro `id` em páginas `SREdit.jsp` e o mostra no side panel. Não tenta ler os outros campos do formulário. O payload envia o modo, a pergunta e, somente no modo SysAid, o ID para o FastAPI local; não envia a URL completa, texto integral da página, HTML, cookies ou screenshots.
 
 O `id` é usado para contextualizar a resposta mock nesta etapa. Em fase futura, será uma chave para o backend buscar o registro no SysAid; o backend deverá confirmar o chamado e a autorização antes de retornar dados reais. O mock escolhe nomes fictícios de empresa e solicitante de forma estável para cada ID, para que não mudem entre perguntas. Título e tipo de suporte são indicados como dados que seriam consultados no SysAid.
 
 ## Comportamento mock
 
-`POST /api/demo/chat` responde com templates estáticos e simula streaming SSE. Não chama LLM, SysAid ou ERP, não consulta PostgreSQL/Valkey e não toma decisões de autorização. Exemplos de SLA/contrato/infraestrutura são fictícios e o painel exibe essa indicação.
+`POST /api/demo/chat` recebe o modo selecionado, responde com templates estáticos e simula streaming SSE. No modo Geral, a resposta informa que a integração ainda não está conectada. Não chama LLM, SysAid ou ERP, não consulta PostgreSQL/Valkey e não toma decisões de autorização. Exemplos de SLA/contrato/infraestrutura são fictícios e o painel exibe essa indicação.
 
 ## Limites e proteção de dados
 
