@@ -22,12 +22,27 @@ class ScreenContext(BaseModel):
     ticket_id: str | None = Field(default=None, max_length=80)
 
 
+class ChatMessage(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    role: Literal["user", "assistant"]
+    content: str = Field(min_length=1, max_length=2000)
+
+
+class ChatHistories(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    sysaid: list[ChatMessage] = Field(default_factory=list, max_length=40)
+    general: list[ChatMessage] = Field(default_factory=list, max_length=40)
+
+
 class DemoChatRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     mode: Literal["sysaid", "general"] = "sysaid"
     message: str = Field(min_length=1, max_length=500)
     screen_context: ScreenContext | None = None
+    histories: ChatHistories = Field(default_factory=ChatHistories)
 
 
 def _mock_answer(message: str, context: ScreenContext | None, mode: str) -> str:
