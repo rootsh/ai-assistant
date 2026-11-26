@@ -50,7 +50,7 @@ Os testes da API usam dependências simuladas e não exigem serviços externos.
 ```text
 apps/api/                 API FastAPI
 demo/extension/           Extensão Chrome Manifest V3 sem dependências JS
-docs/architecture/        dependências e decisões arquiteturais
+doc/                      arquitetura, fluxos, demo, dependências e decisões
 doc/                      desenho da arquitetura alvo e fluxos
 tests/                    testes automatizados
 compose.yaml              API, PostgreSQL e Valkey para desenvolvimento
