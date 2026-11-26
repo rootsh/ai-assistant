@@ -2,6 +2,13 @@
 
 Assistente conversacional para analistas de suporte, integrado visualmente ao SysAid por uma extensão Chrome. A demo oferece áreas **SysAid** e **Geral**, com históricos separados enviados à API e mantidos ao trocar de modo; eles são limpos ao clicar no ícone da extensão.
 
+## Documentação
+
+- [Índice da documentação](doc/README.md)
+- [Arquitetura alvo](doc/arquitetura.md)
+- [Fluxos](doc/fluxos.md)
+- [Como executar a demo](docs/demo.md)
+
 ## Escopo atual
 
 O repositório contém a fundação local (Fase 1) e um recorte demonstrativo para hackathon: extensão Chrome side panel, captura acionada do ID do chamado na URL SysAid e respostas simuladas via FastAPI. Isso não implementa autenticação, agente, integrações reais SysAid/ERP, RAG, histórico persistente ou deploy OpenShift.
@@ -25,7 +32,7 @@ Readiness: http://localhost:8000/health/ready
 
 O Compose aguarda PostgreSQL e Valkey ficarem saudáveis antes de iniciar a API. Valkey é compatível com o protocolo Redis e tem licença BSD-3-Clause; foi escolhido para preservar o requisito de licenças permissivas.
 
-Para carregar a extensão no Chrome e demonstrar em uma tela SysAid, siga [`docs/demo.md`](docs/demo.md). A extensão lê somente o ID do chamado após clique explícito e envia o modo, a pergunta e, somente no modo SysAid, o ID para `localhost:8000`. Empresa e solicitante são fictícios no mock; os dados reais deverão ser consultados no SysAid em uma fase futura. As respostas são simuladas.
+Para carregar a extensão no Chrome e demonstrar em uma tela SysAid, siga [`docs/demo.md`](docs/demo.md). A extensão lê somente o ID do chamado após clique explícito e envia o modo, a pergunta, os históricos separados dos dois modos e, somente no modo SysAid, o ID para `localhost:8000`. Empresa e solicitante são fictícios no mock; os dados reais deverão ser consultados no SysAid em uma fase futura. As respostas são simuladas.
 
 ## Testes
 
@@ -43,7 +50,8 @@ Os testes da API usam dependências simuladas e não exigem serviços externos.
 ```text
 apps/api/                 API FastAPI
 demo/extension/           Extensão Chrome Manifest V3 sem dependências JS
-docs/architecture/        visão e decisões arquiteturais
+docs/architecture/        dependências e decisões arquiteturais
+doc/                      desenho da arquitetura alvo e fluxos
 tests/                    testes automatizados
 compose.yaml              API, PostgreSQL e Valkey para desenvolvimento
 ```
