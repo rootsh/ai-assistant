@@ -61,7 +61,7 @@ def _mock_answer(message: str, context: ScreenContext | None, mode: str) -> str:
     if mode == "general":
         return answer
     ticket = (context.ticket_id if context else None) or "não identificado na tela"
-    return f"{answer}\\n\\nContexto lido da tela: chamado {ticket}."
+    return f"{answer}\n\nContexto lido da tela: chamado {ticket}."
 
 
 @router.post("/chat", summary="Responde com dados simulados para a demo")
