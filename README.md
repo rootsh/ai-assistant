@@ -1,6 +1,6 @@
 # RTM AI Assistant
 
-Assistente conversacional para analistas de suporte, integrado visualmente ao SysAid por uma extensão Chrome. A demo oferece áreas **SysAid** e **Geral**, com históricos separados que permanecem ao trocar de modo e são limpos ao clicar no ícone da extensão.
+Assistente conversacional para analistas de suporte, integrado visualmente ao SysAid por uma extensão Chrome. A demo oferece áreas **SysAid** e **Geral**, com históricos separados enviados à API e mantidos ao trocar de modo; eles são limpos ao clicar no ícone da extensão.
 
 ## Escopo atual
 
