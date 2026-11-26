@@ -16,29 +16,13 @@ Assistente conversacional para analistas consultarem informações autorizadas d
 
 ## Contexto de alto nível (alvo evolutivo)
 
-```mermaid
-flowchart LR
-  Analyst[Analista] --> Extension[Extensão Chrome MV3]
-  Extension -->|streaming autenticado| API[Backend FastAPI]
-  API --> Auth[Autenticação e autorização]
-  API --> Agent[Orquestração LangGraph]
-  Agent --> Gateway[Gateway LiteLLM]
-  Agent --> Tools[Ferramentas permitidas]
-  Tools --> SysAid[Conector SysAid configurável]
-  Tools --> ERP[Conector ERP configurável]
-  Agent --> RAG[Recuperação Haystack]
-  API --> DB[(PostgreSQL + pgvector)]
-  API --> Cache[(Valkey compatível com Redis)]
-  API --> Audit[Auditoria]
-```
-
-O desenho não declara funcionalidades já implementadas. A Fase 1 oferece API mínima, PostgreSQL, cache local e health checks. O recorte de hackathon adiciona uma extensão demonstrativa e respostas mock, sem implementar os demais componentes do desenho.
+O diagrama atualizado, com componentes e responsabilidades, está em [Arquitetura alvo](../../doc/arquitetura.md). Os fluxos de consulta SysAid, modo Geral e RAG estão em [Fluxos](../../doc/fluxos.md). Esses documentos descrevem o destino planejado, não funcionalidades já implementadas.
 
 ## Fase 1 e demonstrador de hackathon
 
 A API mantém pool de conexões PostgreSQL e cliente de cache no ciclo de vida do processo. Liveness mede se o processo responde; readiness verifica `SELECT 1` e `PING`.
 
-No recorte demo, o side panel injeta uma função somente após ação explícita do analista (`activeTab`) e lê um conjunto pequeno de campos visíveis/rotulados da aba. O FastAPI valida o formato permitido e transmite uma resposta estática mock em SSE. Não há chamada a SysAid, ERP, LLM ou banco para compor essa resposta, nem decisão de autorização de negócio.
+Na demo, o side panel só lê o ID da URL `SREdit.jsp` após ação explícita do analista. O FastAPI recebe a pergunta, os históricos em memória dos modos SysAid e Geral e, no modo SysAid, o ID; transmite uma resposta mock em SSE. Empresa e solicitante são fictícios. Não há chamada a SysAid, ERP, LLM ou banco para compor a resposta, nem decisão de autorização de negócio.
 
 ## Identificação de chamado e cliente (fases futuras)
 
