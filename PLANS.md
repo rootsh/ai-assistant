@@ -5,7 +5,7 @@ Não iniciar uma fase posterior sem aprovação explícita.
 | Fase | Escopo | Estado |
 |---|---|---|
 | 1. Fundação do monorepo e ambiente local | Estrutura, FastAPI mínimo, health checks, Compose, documentação e testes-base | Em revisão |
-| Demo de hackathon (recorte) | Side panel MV3, leitura explícita de campos visíveis da tela atual e resposta mockada em streaming pelo FastAPI | Em revisão |
+| Demo de hackathon (recorte) | Side panel MV3, leitura explícita apenas do ID do chamado, modos SysAid/Geral, históricos separados em memória e resposta mock em streaming pelo FastAPI | Em revisão |
 | 2. Backend FastAPI e autenticação | Identidade, autorização no backend e contratos protegidos | Aguardando aprovação |
 | 3. LLM Gateway e LangGraph | Abstração de provedores e orquestração de agente | Aguardando aprovação |
 | 4. Ferramentas e conectores | Interfaces e conectores configuráveis | Aguardando aprovação |
@@ -25,4 +25,4 @@ Não iniciar uma fase posterior sem aprovação explícita.
 
 ## Limite do demonstrador
 
-A demo não substitui a Fase 5 nem implementa conexão real com APIs SysAid/ERP. Usa `activeTab` para leitura iniciada pelo analista, sem permissão permanente para todos os sites. A extração depende de labels textuais/ARIA comuns; a UI real do SysAid pode exigir um adaptador DOM específico após inspeção autorizada da instância.
+A demo não substitui a Fase 5 nem implementa conexão real com APIs SysAid/ERP. Usa `activeTab` para leitura iniciada pelo analista, sem permissão permanente para todos os sites. A demo captura somente o ID da URL do chamado. A integração futura deverá resolver os dados no backend e validar a autorização do analista.
