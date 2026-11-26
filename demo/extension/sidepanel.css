@@ -31,3 +31,5 @@ button { font: inherit; cursor: pointer; }.secondary-button { width: 100%; borde
 .mode-button:focus-visible { outline: 2px solid #d94841; outline-offset: 1px; }
 
 .messages[hidden] { display: none; }
+
+.suggestions[hidden] { display: none; }
