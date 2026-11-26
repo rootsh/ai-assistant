@@ -4,7 +4,11 @@ const authorizeButton = document.querySelector("#authorize-button");
 const readStatus = document.querySelector("#read-status");
 const readIndicator = document.querySelector("#read-indicator");
 const contextFields = document.querySelector("#context-fields");
-const messages = document.querySelector("#messages");
+const messagesByMode = {
+  sysaid: document.querySelector('[data-chat="sysaid"]'),
+  general: document.querySelector('[data-chat="general"]')
+};
+let messages = messagesByMode.sysaid;
 const form = document.querySelector("#chat-form");
 const questionInput = document.querySelector("#question");
 const sendButton = document.querySelector("#send-button");
@@ -14,12 +18,13 @@ const debugLog = document.querySelector("#debug-log");
 const sysaidContextCard = document.querySelector("#sysaid-context");
 const modeButtons = document.querySelectorAll("[data-mode]");
 const suggestionGroups = document.querySelectorAll("[data-suggestions]");
-const welcomeMessage = document.querySelector("#welcome-message");
 
 let screenContext = null;
 let activeMode = "sysaid";
 let debugEnabled = false;
 let lastDebugReport = null;
+const CHAT_SESSION_KEY = "rtmDemoChatSession";
+let lastChatSession = null;
 const buildVersion = document.querySelector("#build-version");
 if (buildVersion) {
   const manifest = chrome.runtime.getManifest();
@@ -112,16 +117,50 @@ function setMode(mode) {
   for (const group of suggestionGroups) {
     group.hidden = group.dataset.suggestions !== mode;
   }
+  for (const [chatMode, panel] of Object.entries(messagesByMode)) {
+    panel.hidden = chatMode !== mode;
+  }
+  messages = messagesByMode[mode];
   questionInput.placeholder = isSysAid ? "Pergunte sobre este chamado…" : "Pergunte sobre qualquer assunto…";
-  welcomeMessage.textContent = isSysAid
-    ? "Abra um chamado no SysAid e selecione Ler chamado visível. Depois pergunte sobre SLA, contrato ou infraestrutura."
-    : "Modo Geral: faça perguntas abertas e explore outras ideias. Nesta demonstração, as respostas continuam simuladas.";
-  messages.querySelectorAll(".message:not(:first-child)").forEach((message) => message.remove());
 }
 
 modeButtons.forEach((button) => {
   button.addEventListener("click", () => setMode(button.dataset.mode));
 });
+
+function clearChatForNewExtensionClick() {
+  for (const panel of Object.values(messagesByMode)) {
+    panel.querySelectorAll(".message:not(:first-child)").forEach((message) => message.remove());
+    panel.scrollTop = 0;
+  }
+  screenContext = null;
+  contextFields.replaceChildren();
+  contextFields.hidden = true;
+  readIndicator.classList.remove("ready");
+  readStatus.textContent = "Autorize o domínio SysAid uma vez; depois, leia um chamado aberto na aba.";
+  questionInput.value = "";
+  debugLog.value = "";
+  lastDebugReport = null;
+  setMode("sysaid");
+}
+
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName !== "session" || !changes[CHAT_SESSION_KEY]) return;
+  const nextSession = changes[CHAT_SESSION_KEY].newValue || 0;
+  if (lastChatSession === null) {
+    lastChatSession = nextSession;
+    return;
+  }
+  if (nextSession !== lastChatSession) {
+    lastChatSession = nextSession;
+    clearChatForNewExtensionClick();
+  }
+});
+
+void chrome.storage.session.get(CHAT_SESSION_KEY).then((stored) => {
+  if (lastChatSession === null) lastChatSession = stored[CHAT_SESSION_KEY] || 0;
+});
+
 
 readButton.addEventListener("click", async () => {
   readButton.disabled = true;
