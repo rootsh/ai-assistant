@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
 from typing import AsyncIterator
 
@@ -14,17 +15,11 @@ router = APIRouter(prefix="/api/demo", tags=["demo"])
 
 
 class ScreenContext(BaseModel):
-    """Small allowlist of visible fields; never accept the full page text."""
+    """Only the ticket identifier is accepted from the browser."""
 
     model_config = ConfigDict(extra="forbid")
 
     ticket_id: str | None = Field(default=None, max_length=80)
-    subject: str | None = Field(default=None, max_length=240)
-    customer: str | None = Field(default=None, max_length=160)
-    support_type: str | None = Field(default=None, max_length=120)
-    requester: str | None = Field(default=None, max_length=160)
-    priority: str | None = Field(default=None, max_length=80)
-    status: str | None = Field(default=None, max_length=80)
 
 
 class DemoChatRequest(BaseModel):
@@ -38,15 +33,18 @@ def _mock_answer(message: str, context: ScreenContext) -> str:
     question = message.casefold()
     if "nível de suporte" in question or "nivel de suporte" in question:
         answer = "Resposta simulada — nível de suporte contratado: Suporte Premium."
-    elif any(term in question for term in ("suporte", "empresa", "título", "titulo")):
-        company = context.customer or "não identificado na tela"
-        subject = context.subject or "não identificado na tela"
-        support_type = context.support_type or "não identificado na tela"
+    elif any(term in question for term in ("empresa", "solicitante", "título", "titulo", "assunto", "tipo de suporte")):
+        companies = ("Aurora Tecnologia (mock)", "Horizonte Logística (mock)", "Nuvem Sul (mock)", "Grupo Ipê (mock)")
+        requesters = ("Marina Costa (mock)", "Rafael Lima (mock)", "Camila Nunes (mock)", "Bruno Alves (mock)")
+        seed = hashlib.sha256((context.ticket_id or "demo").encode()).digest()
+        company = companies[seed[0] % len(companies)]
+        requester = requesters[seed[1] % len(requesters)]
+        ticket = context.ticket_id or "não identificado"
         answer = (
-            "Resposta simulada — dados visíveis do chamado:\n"
+            "Resposta simulada — dados fictícios para demonstração:\n"
             f"Empresa Cliente: {company}\n"
-            f"Título: {subject}\n"
-            f"Tipo de suporte: {support_type}"
+            f"Solicitante: {requester}\n"
+            f"Título e tipo de suporte: seriam consultados no SysAid pelo chamado {ticket}."
         )
     elif "sla" in question or "prazo" in question:
         answer = "Resposta simulada: o SLA prioritário de demonstração é de 4 horas úteis."
