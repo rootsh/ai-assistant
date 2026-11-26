@@ -1,6 +1,6 @@
 # RTM AI Assistant
 
-Assistente conversacional para analistas de suporte, integrado visualmente ao SysAid por uma extensão Chrome.
+Assistente conversacional para analistas de suporte, integrado visualmente ao SysAid por uma extensão Chrome. A demo oferece áreas **SysAid** e **Geral**.
 
 ## Escopo atual
 
@@ -25,7 +25,7 @@ Readiness: http://localhost:8000/health/ready
 
 O Compose aguarda PostgreSQL e Valkey ficarem saudáveis antes de iniciar a API. Valkey é compatível com o protocolo Redis e tem licença BSD-3-Clause; foi escolhido para preservar o requisito de licenças permissivas.
 
-Para carregar a extensão no Chrome e demonstrar em uma tela SysAid, siga [`docs/demo.md`](docs/demo.md). A extensão lê somente o ID do chamado após clique explícito e envia apenas esse ID e a pergunta para `localhost:8000`. Empresa e solicitante são fictícios no mock; os dados reais deverão ser consultados no SysAid em uma fase futura. As respostas são simuladas.
+Para carregar a extensão no Chrome e demonstrar em uma tela SysAid, siga [`docs/demo.md`](docs/demo.md). A extensão lê somente o ID do chamado após clique explícito e envia o modo, a pergunta e, somente no modo SysAid, o ID para `localhost:8000`. Empresa e solicitante são fictícios no mock; os dados reais deverão ser consultados no SysAid em uma fase futura. As respostas são simuladas.
 
 ## Testes
 
