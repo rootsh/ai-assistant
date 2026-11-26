@@ -7,7 +7,7 @@ Assistente conversacional para analistas de suporte, integrado visualmente ao Sy
 - [Índice da documentação](doc/README.md)
 - [Arquitetura alvo](doc/arquitetura.md)
 - [Fluxos](doc/fluxos.md)
-- [Como executar a demo](docs/demo.md)
+- [Como executar a demo](doc/demo.md)
 
 ## Escopo atual
 
@@ -32,7 +32,7 @@ Readiness: http://localhost:8000/health/ready
 
 O Compose aguarda PostgreSQL e Valkey ficarem saudáveis antes de iniciar a API. Valkey é compatível com o protocolo Redis e tem licença BSD-3-Clause; foi escolhido para preservar o requisito de licenças permissivas.
 
-Para carregar a extensão no Chrome e demonstrar em uma tela SysAid, siga [`docs/demo.md`](docs/demo.md). A extensão lê somente o ID do chamado após clique explícito e envia o modo, a pergunta, os históricos separados dos dois modos e, somente no modo SysAid, o ID para `localhost:8000`. Empresa e solicitante são fictícios no mock; os dados reais deverão ser consultados no SysAid em uma fase futura. As respostas são simuladas.
+Para carregar a extensão no Chrome e demonstrar em uma tela SysAid, siga [`doc/demo.md`](doc/demo.md). A extensão lê somente o ID do chamado após clique explícito e envia o modo, a pergunta, os históricos separados dos dois modos e, somente no modo SysAid, o ID para `localhost:8000`. Empresa e solicitante são fictícios no mock; os dados reais deverão ser consultados no SysAid em uma fase futura. As respostas são simuladas.
 
 ## Testes
 
@@ -56,4 +56,4 @@ tests/                    testes automatizados
 compose.yaml              API, PostgreSQL e Valkey para desenvolvimento
 ```
 
-Consulte `.env.example` para configuração, `docs/architecture/dependencies.md` para dependências e `PLANS.md` para fases futuras. Credenciais locais padrão servem somente para desenvolvimento.
+Consulte `.env.example` para configuração, `doc/dependencias.md` para dependências e `PLANS.md` para fases futuras. Credenciais locais padrão servem somente para desenvolvimento.
