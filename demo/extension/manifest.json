@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "RTM AI Assistant — Demo",
-  "version": "0.1.9",
-  "version_name": "0.0.1.b10",
+  "version": "0.1.10",
+  "version_name": "0.0.1.b11",
   "description": "Captura o ID do chamado SysAid e demonstra um chat simulado.",
   "minimum_chrome_version": "119",
   "icons": {
