@@ -9,7 +9,7 @@
   <body>
     <header class="brand">
       <div class="brand-mark">RTM</div>
-      <div><strong>AI Assistant</strong><small>Demo para SysAid · <span id="build-version">v0.0.1.b12</span></small></div>
+      <div><strong>AI Assistant</strong><small>Demo para SysAid · <span id="build-version">v0.0.1.b13</span></small></div>
       <span class="demo-pill">MOCK</span>
     </header>
 
@@ -32,8 +32,11 @@
       </section>
 
       <section class="chat-section" aria-label="Conversa">
-        <div id="messages" class="messages" aria-live="polite">
-          <article class="message assistant"><span class="message-label">ASSISTENTE · SIMULAÇÃO</span><p id="welcome-message">Abra um chamado no SysAid e selecione <strong>Ler chamado visível</strong>. Depois pergunte sobre SLA, contrato ou infraestrutura.</p></article>
+        <div id="messages-sysaid" class="messages" data-chat="sysaid" aria-live="polite">
+          <article class="message assistant"><span class="message-label">ASSISTENTE · SIMULAÇÃO</span><p>Abra um chamado no SysAid e selecione <strong>Ler chamado visível</strong>. Depois pergunte sobre SLA, contrato ou infraestrutura.</p></article>
+        </div>
+        <div id="messages-general" class="messages" data-chat="general" aria-live="polite" hidden>
+          <article class="message assistant"><span class="message-label">ASSISTENTE · SIMULAÇÃO</span><p>Modo Geral: faça perguntas abertas e explore outras ideias. As respostas ainda são simuladas.</p></article>
         </div>
         <div class="suggestions" data-suggestions="sysaid" aria-label="Perguntas sugeridas para SysAid">
           <button type="button" data-question="Qual é o SLA deste chamado?">SLA</button>
@@ -41,10 +44,6 @@
           <button type="button" data-question="Qual é o nível de suporte contratado?">Nível de suporte</button>
           <button type="button" data-question="Qual contrato cobre este serviço?">Contrato</button>
           <button type="button" data-question="Resuma a infraestrutura relacionada">Infraestrutura</button>
-        </div>
-        <div class="suggestions" data-suggestions="general" aria-label="Exemplos para o modo Geral" hidden>
-          <button type="button" data-question="Me ajude a organizar as prioridades do dia.">Organizar prioridades</button>
-          <button type="button" data-question="Sugira ideias para automatizar uma tarefa repetitiva.">Ideias de automação</button>
         </div>
         <form id="chat-form" class="composer">
           <label class="sr-only" for="question">Sua pergunta</label>
