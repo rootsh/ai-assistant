@@ -1,6 +1,10 @@
 # Dependências e licenças
 
-Verificação inicial em 2026-11-23. Versões estão fixadas para reprodutibilidade. Antes de atualizar, revalidar licença, compatibilidade, manutenção e dependências transitivas. A revisão de licença não é auditoria jurídica nem de segurança independente.
+Esta página distingue o **baseline instalado no protótipo** da **stack prevista para o produto final**. A revisão do baseline foi feita em 2026-11-23; a stack-alvo foi conferida em 2026-11-26. Os itens da stack-alvo são candidatos arquiteturais: ainda não foram adicionados ao projeto nem tiveram versões fixadas. Antes de incluí-los, revisar licença, compatibilidade, manutenção e dependências transitivas. Esta verificação não é auditoria jurídica nem de segurança independente.
+
+## Baseline do protótipo
+
+As versões abaixo correspondem às dependências atuais do ambiente local.
 
 | Componente | Versão | Uso | Licença declarada | Compatibilidade/atividade observada |
 |---|---:|---|---|---|
@@ -14,7 +18,32 @@ Verificação inicial em 2026-11-23. Versões estão fixadas para reprodutibilid
 | PostgreSQL | 17 (Alpine) | Banco local | PostgreSQL License | Licença liberal semelhante a BSD/MIT |
 | Valkey | 8 (Alpine) | Cache local compatível com Redis | BSD-3-Clause | Fork comunitário ativo; servidor selecionado para licença permissiva |
 
-## Referências primárias
+## Stack prevista para o produto final
+
+| Componente | Pacote/projeto | Responsabilidade prevista | Licença declarada | Compatibilidade Python informada pelo upstream | Situação |
+|---|---|---|---|---|---|
+| LangGraph | `langgraph` | Orquestração dos fluxos conversacionais, estado, memória e chamada de ferramentas | MIT | >=3.10 | Candidato. Revisar dependências transitivas e estratégia de persistência/checkpoint antes de fixar versão. |
+| Haystack | `haystack-ai` | Ingestão, recuperação de documentos e pipelines de RAG | Apache-2.0 | >=3.11 | Candidato. Integrações, conversores e adaptadores são pacotes separados e devem ser avaliados individualmente. |
+| LiteLLM | `litellm` (SDK principal) | Interface/gateway para desacoplar a aplicação dos provedores de LLM | MIT para o núcleo | >=3.10 e <3.16 | Candidato. Usar somente o núcleo após revisão das dependências. Não selecionar o extra `[proxy]`: a configuração publicada atualmente inclui `litellm-enterprise`. Módulos Enterprise têm licença separada. |
+
+A faixa atual de Python do projeto (3.12–3.14) atende aos requisitos declarados por esses três projetos upstream. Isso não substitui a validação conjunta das versões escolhidas, nem garante que todos os extras ou integrações sejam compatíveis.
+
+### Como os componentes se complementam
+
+- **LangGraph** coordena o caminho de cada conversa e decide quando chamar ferramentas autorizadas.
+- **Haystack** organiza a busca em documentos e fontes indexadas quando o fluxo precisar de RAG.
+- **LiteLLM** oferece a camada de integração com provedores de modelos, evitando acoplar os workflows a um fornecedor.
+- **FastAPI** permanece como API da aplicação. Os conectores SysAid e ERP continuam como interfaces próprias, sem presumir endpoints que ainda não foram confirmados.
+
+A escolha final de versões e extras será feita na fase de implementação correspondente, com revisão de licença e compatibilidade e inclusão de pins no arquivo de dependências. Não instalar componentes Enterprise nem extras que os tragam indiretamente.
+
+## Referências primárias da stack-alvo
+
+- [LangGraph: metadados e dependências](https://github.com/langchain-ai/langgraph/blob/main/libs/langgraph/pyproject.toml) · [licença](https://github.com/langchain-ai/langgraph/blob/main/LICENSE)
+- [Haystack: metadados e dependências](https://github.com/deepset-ai/haystack/blob/main/pyproject.toml) · [licença](https://github.com/deepset-ai/haystack/blob/main/LICENSE)
+- [LiteLLM: metadados, dependências e extras](https://github.com/BerriAI/litellm/blob/main/pyproject.toml) · [licença e separação de Enterprise](https://github.com/BerriAI/litellm/blob/main/LICENSE)
+
+## Referências do baseline
 
 - [FastAPI (MIT)](https://github.com/fastapi/fastapi)
 - [setuptools no PyPI](https://pypi.org/project/setuptools/)
@@ -33,4 +62,4 @@ Redis 7.2.x e anteriores permanecem BSD-3-Clause. Redis 7.4–7.8 usa RSALv2/SSP
 
 ## Limites da verificação
 
-Versões refletem o catálogo consultado nesta data; imagem de contêiner precisa de digest pinning e varredura antes de produção. A disponibilidade de uma versão ou licença permissiva não representa certificação de segurança.
+Versões refletem o catálogo consultado nas datas indicadas; imagem de contêiner precisa de digest pinning e varredura antes de produção. A disponibilidade de uma versão ou licença permissiva não representa certificação de segurança.
