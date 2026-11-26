@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import json
-from typing import AsyncIterator
+from typing import AsyncIterator, Literal
 
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
@@ -25,21 +25,24 @@ class ScreenContext(BaseModel):
 class DemoChatRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
+    mode: Literal["sysaid", "general"] = "sysaid"
     message: str = Field(min_length=1, max_length=500)
-    screen_context: ScreenContext
+    screen_context: ScreenContext | None = None
 
 
-def _mock_answer(message: str, context: ScreenContext) -> str:
+def _mock_answer(message: str, context: ScreenContext | None, mode: str) -> str:
     question = message.casefold()
-    if "nível de suporte" in question or "nivel de suporte" in question:
+    if mode == "general":
+        answer = "Resposta simulada do modo Geral: esta área está pronta para consultas e ferramentas futuras. Ainda não há um modelo de linguagem conectado."
+    elif "nível de suporte" in question or "nivel de suporte" in question:
         answer = "Resposta simulada — nível de suporte contratado: Suporte Premium."
     elif any(term in question for term in ("empresa", "solicitante", "título", "titulo", "assunto", "tipo de suporte")):
         companies = ("Aurora Tecnologia (mock)", "Horizonte Logística (mock)", "Nuvem Sul (mock)", "Grupo Ipê (mock)")
         requesters = ("Marina Costa (mock)", "Rafael Lima (mock)", "Camila Nunes (mock)", "Bruno Alves (mock)")
-        seed = hashlib.sha256((context.ticket_id or "demo").encode()).digest()
+        seed = hashlib.sha256(((context.ticket_id if context else None) or "demo").encode()).digest()
         company = companies[seed[0] % len(companies)]
         requester = requesters[seed[1] % len(requesters)]
-        ticket = context.ticket_id or "não identificado"
+        ticket = (context.ticket_id if context else None) or "não identificado"
         answer = (
             "Resposta simulada — dados fictícios para demonstração:\n"
             f"Empresa Cliente: {company}\n"
@@ -55,13 +58,15 @@ def _mock_answer(message: str, context: ScreenContext) -> str:
     else:
         answer = "Resposta simulada: encontrei o contexto visível do chamado. Consulte SLA, contrato ou infraestrutura para ver exemplos."
 
-    ticket = context.ticket_id or "não identificado na tela"
-    return f"{answer}\n\nContexto lido da tela: chamado {ticket}."
+    if mode == "general":
+        return answer
+    ticket = (context.ticket_id if context else None) or "não identificado na tela"
+    return f"{answer}\\n\\nContexto lido da tela: chamado {ticket}."
 
 
 @router.post("/chat", summary="Responde com dados simulados para a demo")
 async def demo_chat(payload: DemoChatRequest) -> StreamingResponse:
-    answer = _mock_answer(payload.message, payload.screen_context)
+    answer = _mock_answer(payload.message, payload.screen_context, payload.mode)
 
     async def events() -> AsyncIterator[str]:
         for token in answer.split(" "):
