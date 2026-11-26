@@ -5,7 +5,7 @@
 1. Abrir um chamado real no SysAid em uma aba Chrome.
 2. Carregar `demo/extension` como extensão não empacotada em `chrome://extensions` (habilitar modo de desenvolvedor).
 3. Clicar no ícone da extensão para abrir o side panel e em **Autorizar acesso ao SysAid**. O Chrome pede acesso somente a `rtm.sysaidit.com`.
-4. Abrir um chamado e clicar em **Ler chamado visível**. Mostrar os campos reconhecidos.
+4. Abrir um chamado e clicar em **Ler chamado visível**. Mostrar apenas o ID capturado.
 5. Perguntar “Qual é o SLA deste chamado?” e observar a resposta simulada chegando em streaming.
 
 ## Subir a API
@@ -19,11 +19,9 @@ A API fica em `http://localhost:8000`; readiness em `/health/ready`. PostgreSQL 
 
 ## O que a extensão lê
 
-A leitura só é acionada pelo analista. A permissão opcional de host é pedida após clique explícito e limitada a `https://rtm.sysaidit.com/*`; o padrão cobre páginas como `/SREdit.jsp?pageID=4&id=15261`. Chrome mantém essa permissão até ser revogada em `chrome://extensions`. `scripting` injeta a função somente após **Ler chamado visível**. A extensão procura o parâmetro `id` em páginas `SREdit.jsp` e labels/ARIA/textos simples correspondentes a assunto, empresa/cliente, solicitante, prioridade e status. Campos reconhecidos ficam no side panel. O payload envia somente esses campos e a pergunta para o FastAPI local; não envia a URL completa, texto integral da página, HTML, cookies ou screenshots.
+A leitura só é acionada pelo analista. A permissão opcional de host é pedida após clique explícito e limitada a `https://rtm.sysaidit.com/*`; o padrão cobre páginas como `/SREdit.jsp?pageID=4&id=15261`. Chrome mantém essa permissão até ser revogada em `chrome://extensions`. `scripting` injeta a função somente após **Ler chamado visível**. A extensão captura somente o parâmetro `id` em páginas `SREdit.jsp` e o mostra no side panel. Não tenta ler os outros campos do formulário. O payload envia somente o ID e a pergunta para o FastAPI local; não envia a URL completa, texto integral da página, HTML, cookies ou screenshots.
 
-O `id` é usado apenas para contextualizar a resposta mock nesta etapa. Em fase futura, será uma chave candidata para o backend buscar o registro no SysAid; o backend deverá confirmar o chamado e a autorização antes de retornar dados reais. A pergunta sugerida **Empresa + título** pede empresa cliente, título e tipo de suporte. Para a tela mostrada, o extractor procura `Empresa Cliente`, o título no cabeçalho/`Breve descrição` e o valor visível `Suporte Técnico TI`; esses valores não estão fixados na resposta.
-
-O extractor é genérico e best effort. SysAid pode renderizar alguns dados em componentes sem labels DOM acessíveis ou dentro de canvas/iframes; nesses casos os campos podem não ser capturados. A demo não afirma compatibilidade universal com versões/layouts SysAid. Depois de validar o DOM da instância, os aliases e seletores podem ser ajustados sem inventar endpoints.
+O `id` é usado para contextualizar a resposta mock nesta etapa. Em fase futura, será uma chave para o backend buscar o registro no SysAid; o backend deverá confirmar o chamado e a autorização antes de retornar dados reais. O mock escolhe nomes fictícios de empresa e solicitante de forma estável para cada ID, para que não mudem entre perguntas. Título e tipo de suporte são indicados como dados que seriam consultados no SysAid.
 
 ## Comportamento mock
 
