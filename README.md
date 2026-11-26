@@ -4,7 +4,7 @@ Assistente conversacional para analistas de suporte, integrado visualmente ao Sy
 
 ## Escopo atual
 
-O repositório contém a fundação local (Fase 1) e um recorte demonstrativo para hackathon: extensão Chrome side panel, leitura acionada de campos visíveis da aba atual e respostas simuladas via FastAPI. Isso não implementa autenticação, agente, integrações reais SysAid/ERP, RAG, histórico persistente ou deploy OpenShift.
+O repositório contém a fundação local (Fase 1) e um recorte demonstrativo para hackathon: extensão Chrome side panel, captura acionada do ID do chamado na URL SysAid e respostas simuladas via FastAPI. Isso não implementa autenticação, agente, integrações reais SysAid/ERP, RAG, histórico persistente ou deploy OpenShift.
 
 ## Pré-requisitos
 
@@ -25,7 +25,7 @@ Readiness: http://localhost:8000/health/ready
 
 O Compose aguarda PostgreSQL e Valkey ficarem saudáveis antes de iniciar a API. Valkey é compatível com o protocolo Redis e tem licença BSD-3-Clause; foi escolhido para preservar o requisito de licenças permissivas.
 
-Para carregar a extensão no Chrome e demonstrar em uma tela SysAid, siga [`docs/demo.md`](docs/demo.md). A extensão pede a leitura somente ao clicar no botão, extrai campos reconhecidos localmente e envia apenas esses campos para `localhost:8000`. As respostas são simuladas.
+Para carregar a extensão no Chrome e demonstrar em uma tela SysAid, siga [`docs/demo.md`](docs/demo.md). A extensão lê somente o ID do chamado após clique explícito e envia apenas esse ID e a pergunta para `localhost:8000`. Empresa e solicitante são fictícios no mock; os dados reais deverão ser consultados no SysAid em uma fase futura. As respostas são simuladas.
 
 ## Testes
 
