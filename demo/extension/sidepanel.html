@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RTM AI Assistant</title>
+    <link rel="stylesheet" href="sidepanel.css" />
+  </head>
+  <body>
+    <header class="brand">
+      <div class="brand-mark">RTM</div>
+      <div><strong>AI Assistant</strong><small><span id="build-version">v0.0.1.b15</span></small></div>
+      <span class="demo-pill">MOCK</span>
+    </header>
+
+    <main>
+      <nav class="mode-switch" aria-label="Área do assistente">
+        <button type="button" class="mode-button active" data-mode="sysaid" aria-pressed="true">SysAid</button>
+        <button type="button" class="mode-button" data-mode="general" aria-pressed="false">Geral</button>
+      </nav>
+      <section id="sysaid-context" class="context-card" aria-labelledby="context-heading">
+        <div class="section-heading"><div><span class="eyebrow">CONTEXTO DA TELA</span><h1 id="context-heading">Chamado atual</h1></div><span id="read-indicator" class="status-dot"></span></div>
+        <p id="read-status" class="muted">Autorize o domínio SysAid uma vez; depois, leia um chamado aberto na aba.</p>
+        <button id="authorize-button" class="secondary-button" type="button">Autorizar acesso ao SysAid</button>
+        <button id="read-button" class="secondary-button" type="button" disabled>Ler chamado visível</button>
+        <div class="debug-controls">
+          <button id="debug-toggle" class="debug-button" type="button" aria-pressed="false">Debug: desligado</button>
+          <button id="copy-debug" class="debug-button" type="button" hidden>Copiar log</button>
+        </div>
+        <textarea id="debug-log" class="debug-log" rows="6" readonly hidden aria-label="Log de diagnóstico"></textarea>
+        <dl id="context-fields" class="context-fields" hidden></dl>
+      </section>
+
+      <section class="chat-section" aria-label="Conversa">
+        <div id="messages-sysaid" class="messages" data-chat="sysaid" aria-live="polite">
+          <article class="message assistant"><span class="message-label">ASSISTENTE · SIMULAÇÃO</span><p>Abra um chamado no SysAid e selecione <strong>Ler chamado visível</strong>. Depois pergunte sobre SLA, contrato ou infraestrutura.</p></article>
+        </div>
+        <div id="messages-general" class="messages" data-chat="general" aria-live="polite" hidden>
+          <article class="message assistant"><span class="message-label">ASSISTENTE · SIMULAÇÃO</span><p>Modo Geral: faça perguntas abertas e explore outras ideias. As respostas ainda são simuladas.</p></article>
+        </div>
+        <div class="suggestions" data-suggestions="sysaid" aria-label="Perguntas sugeridas para SysAid">
+          <button type="button" data-question="Qual é o SLA deste chamado?">SLA</button>
+          <button type="button" data-question="Qual empresa e solicitante estão associados a este chamado? E qual é o título?">Empresa + título</button>
+          <button type="button" data-question="Qual é o nível de suporte contratado?">Nível de suporte</button>
+          <button type="button" data-question="Qual contrato cobre este serviço?">Contrato</button>
+          <button type="button" data-question="Resuma a infraestrutura relacionada">Infraestrutura</button>
+        </div>
+        <form id="chat-form" class="composer">
+          <label class="sr-only" for="question">Sua pergunta</label>
+          <textarea id="question" rows="2" maxlength="500" placeholder="Pergunte sobre este chamado…" required></textarea>
+          <button id="send-button" type="submit" aria-label="Enviar pergunta">↑</button>
+        </form>
+        <p class="disclaimer">Protótipo: respostas simuladas, sem consulta ao SysAid, ERP ou LLM.</p>
+      </section>
+    </main>
+    <script src="sidepanel.js"></script>
+  </body>
+</html>
