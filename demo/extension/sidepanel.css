@@ -29,3 +29,5 @@ button { font: inherit; cursor: pointer; }.secondary-button { width: 100%; borde
 .mode-button { flex: 1; border: 0; border-radius: 8px; padding: 8px 10px; color: #667085; background: transparent; font-size: 12px; font-weight: 700; }
 .mode-button.active { color: #a91f1b; background: #fff; box-shadow: 0 1px 3px #1018281a; }
 .mode-button:focus-visible { outline: 2px solid #d94841; outline-offset: 1px; }
+
+.messages[hidden] { display: none; }
