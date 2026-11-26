@@ -10,6 +10,9 @@ import asyncpg
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 from redis.asyncio import Redis
+from fastapi.middleware.cors import CORSMiddleware
+
+from rtm_ai.demo import router as demo_router
 
 
 async def _default_pool_factory(database_url: str) -> Any:
@@ -51,6 +54,14 @@ def create_app(
         description="Fundação da API. Funcionalidades de negócio serão adicionadas em fases aprovadas.",
         lifespan=lifespan,
     )
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[],
+        allow_origin_regex=r"^chrome-extension://[a-p]{32}$",
+        allow_methods=["GET", "POST"],
+        allow_headers=["Content-Type"],
+    )
+    app.include_router(demo_router)
 
     @app.get("/health/live", tags=["health"], summary="Verifica se o processo está ativo")
     async def live() -> dict[str, str]:

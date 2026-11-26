@@ -1,0 +1,55 @@
+{
+  "manifest_version": 3,
+  "name": "RTM AI Assistant — Demo",
+  "version": "0.1.14",
+  "version_name": "0.0.1.b15",
+  "description": "Captura o ID do chamado SysAid e demonstra um chat simulado.",
+  "minimum_chrome_version": "119",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "permissions": [
+    "activeTab",
+    "sidePanel",
+    "scripting",
+    "storage"
+  ],
+  "optional_host_permissions": [
+    "https://*.sysaidit.com/*",
+    "https://rtm.sysaidit.co/*"
+  ],
+  "host_permissions": [
+    "http://localhost:8000/*"
+  ],
+  "background": {
+    "service_worker": "service-worker.js",
+    "type": "module"
+  },
+  "action": {
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png"
+    },
+    "default_title": "Abrir RTM AI Assistant"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.sysaidit.com/*",
+        "https://rtm.sysaidit.co/*"
+      ],
+      "js": [
+        "ticket-reader.js"
+      ],
+      "all_frames": true,
+      "match_origin_as_fallback": true,
+      "run_at": "document_idle"
+    }
+  ]
+}
