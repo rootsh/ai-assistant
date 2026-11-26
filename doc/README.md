@@ -1,10 +1,11 @@
 # Documentação
 
-Documentação curta do RTM AI Assistant. O desenho mostra a arquitetura desejada; a implementação atual continua sendo uma demo com resposta mock.
+Documentação do RTM AI Assistant. O desenho descreve a arquitetura alvo; a implementação atual é uma demo com respostas mock.
 
-- [Arquitetura alvo](arquitetura.md): componentes, responsabilidades e limites de confiança.
+- [Arquitetura alvo](arquitetura.md): desenho, componentes, princípios e segurança.
 - [Fluxos](fluxos.md): consulta SysAid, modo Geral e RAG.
-- [Demonstração hackathon](../docs/demo.md): instalação e execução do protótipo.
-- [Decisões e princípios](../docs/architecture/overview.md): decisões arquiteturais existentes.
+- [Demonstração](demo.md): instalação e execução do protótipo.
+- [Dependências e licenças](dependencias.md): avaliação inicial da stack local.
+- [Decisão de cache](decisoes/0001-cache-permissivo.md): por que o Compose usa Valkey.
 
-Comece por [Arquitetura alvo](arquitetura.md) e depois veja os [Fluxos](fluxos.md).
+O planejamento geral permanece em [PLANS.md](../PLANS.md), na raiz do repositório.
