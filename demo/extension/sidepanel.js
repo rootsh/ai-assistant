@@ -21,16 +21,6 @@ if (buildVersion) {
   buildVersion.textContent = `v${manifest.version_name || manifest.version}`;
 }
 
-const labels = {
-  ticket_id: "Chamado",
-  subject: "Assunto",
-  customer: "Empresa/cliente",
-  support_type: "Tipo de suporte",
-  requester: "Solicitante",
-  priority: "Prioridade",
-  status: "Status"
-};
-
 debugToggle.addEventListener("click", () => {
   debugEnabled = !debugEnabled;
   debugToggle.textContent = `Debug: ${debugEnabled ? "ligado" : "desligado"}`;
@@ -77,14 +67,12 @@ authorizeButton.addEventListener("click", async () => {
 
 function renderContext(context) {
   contextFields.replaceChildren();
-  for (const [key, label] of Object.entries(labels)) {
-    if (!context[key]) continue;
-    const dt = document.createElement("dt");
-    dt.textContent = label;
-    const dd = document.createElement("dd");
-    dd.textContent = context[key];
-    contextFields.append(dt, dd);
-  }
+  const ticketLabel = document.createElement("dt");
+  ticketLabel.textContent = "Chamado";
+  const ticketValue = document.createElement("dd");
+  ticketValue.textContent = context.ticket_id;
+  contextFields.append(ticketLabel, ticketValue);
+
   const supportLevelLabel = document.createElement("dt");
   supportLevelLabel.textContent = "Nível de suporte (mock)";
   const supportLevel = document.createElement("dd");
@@ -132,16 +120,12 @@ readButton.addEventListener("click", async () => {
         context.ticket_id = requestId;
       }
     }
-    screenContext = context;
-    renderContext(context);
-    const fieldCount = Object.values(context).filter(Boolean).length;
-    if (!fieldCount) screenContext = null;
-    const detailFields = ["customer", "subject", "support_type"].filter((key) => context[key]).length;
+    screenContext = context.ticket_id ? { ticket_id: context.ticket_id } : null;
+    const fieldCount = screenContext ? 1 : 0;
+    if (screenContext) renderContext(screenContext);
     readStatus.textContent = fieldCount
-      ? detailFields
-        ? `${fieldCount} campo(s) capturado(s). Somente os valores selecionados são enviados à API local.`
-        : `${fieldCount} campo(s) capturado(s), mas os campos do formulário não foram lidos. Ative o Debug para ver o diagnóstico.`
-      : `Não encontrei campos de chamado. Ative o Debug para ver o diagnóstico.`;
+      ? "ID do chamado capturado. Empresa e solicitante serão fictícios no mock; os demais dados seriam consultados no SysAid."
+      : "Não encontrei o ID do chamado nesta página. Abra um chamado em SREdit.jsp.";
     if (debugEnabled) {
       const permissions = await chrome.permissions.getAll();
       const page = tab.url ? new URL(tab.url) : null;
@@ -218,8 +202,8 @@ async function collectFrameContexts(tabId) {
 }
 
 async function sendQuestion(question) {
-  if (!screenContext || (!screenContext.ticket_id && !screenContext.subject)) {
-    readStatus.textContent = "Abra um chamado e leia pelo menos o ID ou o assunto antes de conversar.";
+  if (!screenContext?.ticket_id) {
+    readStatus.textContent = "Abra um chamado e capture o ID antes de conversar.";
     return;
   }
   addMessage("user", question);
