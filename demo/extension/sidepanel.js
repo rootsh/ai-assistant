@@ -11,8 +11,13 @@ const sendButton = document.querySelector("#send-button");
 const debugToggle = document.querySelector("#debug-toggle");
 const copyDebugButton = document.querySelector("#copy-debug");
 const debugLog = document.querySelector("#debug-log");
+const sysaidContextCard = document.querySelector("#sysaid-context");
+const modeButtons = document.querySelectorAll("[data-mode]");
+const suggestionGroups = document.querySelectorAll("[data-suggestions]");
+const welcomeMessage = document.querySelector("#welcome-message");
 
 let screenContext = null;
+let activeMode = "sysaid";
 let debugEnabled = false;
 let lastDebugReport = null;
 const buildVersion = document.querySelector("#build-version");
@@ -94,6 +99,29 @@ function addMessage(kind, text = "") {
   messages.scrollTop = messages.scrollHeight;
   return paragraph;
 }
+
+function setMode(mode) {
+  activeMode = mode;
+  const isSysAid = mode === "sysaid";
+  sysaidContextCard.hidden = !isSysAid;
+  for (const button of modeButtons) {
+    const selected = button.dataset.mode === mode;
+    button.classList.toggle("active", selected);
+    button.setAttribute("aria-pressed", String(selected));
+  }
+  for (const group of suggestionGroups) {
+    group.hidden = group.dataset.suggestions !== mode;
+  }
+  questionInput.placeholder = isSysAid ? "Pergunte sobre este chamado…" : "Pergunte sobre qualquer assunto…";
+  welcomeMessage.textContent = isSysAid
+    ? "Abra um chamado no SysAid e selecione Ler chamado visível. Depois pergunte sobre SLA, contrato ou infraestrutura."
+    : "Modo Geral: faça perguntas abertas e explore outras ideias. Nesta demonstração, as respostas continuam simuladas.";
+  messages.querySelectorAll(".message:not(:first-child)").forEach((message) => message.remove());
+}
+
+modeButtons.forEach((button) => {
+  button.addEventListener("click", () => setMode(button.dataset.mode));
+});
 
 readButton.addEventListener("click", async () => {
   readButton.disabled = true;
@@ -202,7 +230,7 @@ async function collectFrameContexts(tabId) {
 }
 
 async function sendQuestion(question) {
-  if (!screenContext?.ticket_id) {
+  if (activeMode === "sysaid" && !screenContext?.ticket_id) {
     readStatus.textContent = "Abra um chamado e capture o ID antes de conversar.";
     return;
   }
@@ -214,7 +242,7 @@ async function sendQuestion(question) {
     const response = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: question, screen_context: screenContext })
+      body: JSON.stringify({ mode: activeMode, message: question, screen_context: { ticket_id: activeMode === "sysaid" ? screenContext?.ticket_id || null : null } })
     });
     if (!response.ok || !response.body) throw new Error(`API respondeu ${response.status}`);
     const reader = response.body.getReader();
