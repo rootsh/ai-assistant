@@ -9,12 +9,16 @@
   <body>
     <header class="brand">
       <div class="brand-mark">RTM</div>
-      <div><strong>AI Assistant</strong><small>Demo para SysAid · <span id="build-version">v0.0.1.b11</span></small></div>
+      <div><strong>AI Assistant</strong><small>Demo para SysAid · <span id="build-version">v0.0.1.b12</span></small></div>
       <span class="demo-pill">MOCK</span>
     </header>
 
     <main>
-      <section class="context-card" aria-labelledby="context-heading">
+      <nav class="mode-switch" aria-label="Área do assistente">
+        <button type="button" class="mode-button active" data-mode="sysaid" aria-pressed="true">SysAid</button>
+        <button type="button" class="mode-button" data-mode="general" aria-pressed="false">Geral</button>
+      </nav>
+      <section id="sysaid-context" class="context-card" aria-labelledby="context-heading">
         <div class="section-heading"><div><span class="eyebrow">CONTEXTO DA TELA</span><h1 id="context-heading">Chamado atual</h1></div><span id="read-indicator" class="status-dot"></span></div>
         <p id="read-status" class="muted">Autorize o domínio SysAid uma vez; depois, leia um chamado aberto na aba.</p>
         <button id="authorize-button" class="secondary-button" type="button">Autorizar acesso ao SysAid</button>
@@ -29,14 +33,18 @@
 
       <section class="chat-section" aria-label="Conversa">
         <div id="messages" class="messages" aria-live="polite">
-          <article class="message assistant"><span class="message-label">ASSISTENTE · SIMULAÇÃO</span><p>Abra um chamado no SysAid e selecione <strong>Ler chamado visível</strong>. Depois pergunte sobre SLA, contrato ou infraestrutura.</p></article>
+          <article class="message assistant"><span class="message-label">ASSISTENTE · SIMULAÇÃO</span><p id="welcome-message">Abra um chamado no SysAid e selecione <strong>Ler chamado visível</strong>. Depois pergunte sobre SLA, contrato ou infraestrutura.</p></article>
         </div>
-        <div class="suggestions" aria-label="Perguntas sugeridas">
+        <div class="suggestions" data-suggestions="sysaid" aria-label="Perguntas sugeridas para SysAid">
           <button type="button" data-question="Qual é o SLA deste chamado?">SLA</button>
           <button type="button" data-question="Qual empresa e solicitante estão associados a este chamado? E qual é o título?">Empresa + título</button>
           <button type="button" data-question="Qual é o nível de suporte contratado?">Nível de suporte</button>
           <button type="button" data-question="Qual contrato cobre este serviço?">Contrato</button>
           <button type="button" data-question="Resuma a infraestrutura relacionada">Infraestrutura</button>
+        </div>
+        <div class="suggestions" data-suggestions="general" aria-label="Exemplos para o modo Geral" hidden>
+          <button type="button" data-question="Me ajude a organizar as prioridades do dia.">Organizar prioridades</button>
+          <button type="button" data-question="Sugira ideias para automatizar uma tarefa repetitiva.">Ideias de automação</button>
         </div>
         <form id="chat-form" class="composer">
           <label class="sr-only" for="question">Sua pergunta</label>
