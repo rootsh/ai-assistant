@@ -273,6 +273,18 @@ async function sendQuestion(question) {
     readStatus.textContent = "Abra um chamado e capture o ID antes de conversar.";
     return;
   }
+  const histories = Object.fromEntries(
+    Object.entries(messagesByMode).map(([mode, panel]) => [
+      mode,
+      [...panel.querySelectorAll(".message:not(:first-child)")]
+        .slice(-40)
+        .map((message) => ({
+          role: message.classList.contains("user") ? "user" : "assistant",
+          content: message.querySelector("p")?.textContent?.trim() || ""
+        }))
+        .filter((message) => message.content)
+    ])
+  );
   addMessage("user", question);
   questionInput.value = "";
   sendButton.disabled = true;
@@ -281,7 +293,7 @@ async function sendQuestion(question) {
     const response = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ mode: activeMode, message: question, screen_context: { ticket_id: activeMode === "sysaid" ? screenContext?.ticket_id || null : null } })
+      body: JSON.stringify({ mode: activeMode, message: question, screen_context: { ticket_id: activeMode === "sysaid" ? screenContext?.ticket_id || null : null }, histories })
     });
     if (!response.ok || !response.body) throw new Error(`API respondeu ${response.status}`);
     const reader = response.body.getReader();
